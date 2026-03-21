@@ -1,0 +1,1910 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Datos en común — Democratizando la información presupuestaria sobre discapacidad en Argentina</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+  <style>
+    :root {
+      --azul:        #111827;  /* Negro profundo — acento principal */
+      --azul-med:    #374151;
+      --azul-calc:   #4b5563;
+      --azul-est:    #9ca3af;
+      --azul-suave:  #f3f4f6;
+      --rojo:        #dc2626;
+      --rojo-suave:  #fef2f2;
+      --verde:       #16a34a;
+      --verde-suave: #f0fdf4;
+      --amarillo:    #d97706;
+      --amarillo-s:  #fffbeb;
+      --gris:        #6b7280;
+      --gris-suave:  #f9fafb;
+      --texto:       #111827;
+      --borde:       #e5e7eb;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+      color: var(--texto);
+      line-height: 1.65;
+      background: #fff;
+    }
+
+    /* NAV */
+    nav {
+      position: sticky; top: 0; z-index: 100;
+      background: #fff; border-bottom: 1px solid var(--borde);
+      padding: 0 24px; height: 52px;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .nav-logo { font-weight: 900; font-size: 1rem; color: var(--texto); letter-spacing: -.01em; }
+    .nav-logo span { color: var(--verde); }
+    .nav-links { display: flex; gap: 20px; list-style: none; flex-wrap: wrap; }
+    .nav-links a { color: var(--gris); text-decoration: none; font-size: 0.80rem; font-weight: 500; }
+    .nav-links a:hover { color: var(--azul); }
+
+    /* LAYOUT */
+    .container { max-width: 860px; margin: 0 auto; padding: 0 24px; }
+    section { padding: 64px 0; }
+    section + section { border-top: 1px solid var(--borde); }
+
+    /* HERO */
+    .hero {
+      background: linear-gradient(135deg, #0f172a 0%, #1e293b 60%, #111827 100%);
+      color: #fff; padding: 72px 24px 60px; text-align: center;
+    }
+    .hero-tag {
+      display: inline-block;
+      background: rgba(255,255,255,.15); border: 1px solid rgba(255,255,255,.3);
+      border-radius: 20px; padding: 4px 14px; font-size: 0.75rem;
+      font-weight: 600; letter-spacing: .06em; text-transform: uppercase;
+      margin-bottom: 20px;
+    }
+    .hero h1 {
+      font-size: clamp(2rem, 5vw, 3.2rem);
+      font-weight: 900; line-height: 1.15; margin-bottom: 20px;
+    }
+    .hero h1 span { color: #fbbf24; }
+    .hero p {
+      max-width: 600px; margin: 0 auto 32px;
+      font-size: clamp(1rem, 2.5vw, 1.15rem); opacity: .9;
+    }
+    .hero-ctas { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+    .btn-pri {
+      background: #fff; color: var(--azul);
+      font-weight: 700; font-size: 0.9rem;
+      padding: 12px 24px; border-radius: 8px; text-decoration: none;
+      transition: transform .15s;
+    }
+    .btn-pri:hover { transform: translateY(-1px); }
+    .btn-sec {
+      background: transparent; color: #fff;
+      font-weight: 600; font-size: 0.9rem;
+      padding: 12px 24px; border-radius: 8px; text-decoration: none;
+      border: 2px solid rgba(255,255,255,.5);
+      transition: border-color .15s;
+    }
+    .btn-sec:hover { border-color: #fff; }
+
+    /* LABEL + H2 */
+    .label {
+      font-size: 0.72rem; font-weight: 700; letter-spacing: .1em;
+      text-transform: uppercase; color: var(--azul-med); margin-bottom: 6px;
+    }
+    h2 { font-size: clamp(1.4rem, 3vw, 2rem); font-weight: 800; margin-bottom: 14px; }
+    .lead { font-size: 1.05rem; color: #374151; margin-bottom: 28px; max-width: 700px; }
+
+    /* KPI GRID */
+    .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; margin: 28px 0; }
+    .kpi {
+      background: var(--azul-suave); border-radius: 12px; padding: 20px;
+      border-left: 4px solid var(--azul);
+    }
+    .kpi.rojo  { background: var(--rojo-suave); border-color: var(--rojo); }
+    .kpi.naranja { background: var(--amarillo-s); border-color: var(--amarillo); }
+    .kpi.verde { background: var(--verde-suave); border-color: var(--verde); }
+    .kpi-num { font-size: 2rem; font-weight: 900; color: var(--azul); line-height: 1.1; }
+    .kpi.rojo .kpi-num  { color: var(--rojo); }
+    .kpi.naranja .kpi-num { color: var(--amarillo); }
+    .kpi.verde .kpi-num { color: var(--verde); }
+    .kpi-lbl { font-size: 0.82rem; color: #374151; margin-top: 6px; }
+    .kpi-src { font-size: 0.72rem; color: var(--gris); margin-top: 6px; }
+
+    /* CHART CARD */
+    .chart-card {
+      background: #fff; border: 1px solid var(--borde); border-radius: 14px;
+      padding: 24px; margin-top: 24px;
+      box-shadow: 0 1px 4px rgba(0,0,0,.05);
+    }
+    .chart-card-title { font-weight: 700; font-size: 0.97rem; margin-bottom: 4px; }
+    .chart-card-sub   { font-size: 0.8rem; color: var(--gris); margin-bottom: 16px; }
+    .chart-box        { position: relative; height: 320px; }
+    .chart-box.sm     { height: 240px; }
+    .chart-legend     { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 14px; font-size: 0.8rem; }
+    .legend-item      { display: flex; align-items: center; gap: 6px; }
+    .legend-dot       { width: 12px; height: 12px; border-radius: 3px; }
+    .chart-nota       { font-size: 0.78rem; color: var(--gris); margin-top: 14px; line-height: 1.6; border-top: 1px solid var(--borde); padding-top: 12px; }
+
+    /* INFO CARDS */
+    .info-card {
+      background: var(--gris-suave); border-radius: 12px;
+      padding: 20px; border: 1px solid var(--borde);
+    }
+    .info-card h3 { font-size: 0.95rem; font-weight: 700; margin-bottom: 8px; }
+    .info-card p  { font-size: 0.85rem; color: #374151; }
+
+    /* BOXES */
+    .box {
+      background: var(--azul-suave); border-left: 4px solid var(--azul);
+      border-radius: 0 8px 8px 0; padding: 16px 20px;
+      font-size: 0.87rem; line-height: 1.65; margin: 20px 0;
+    }
+    .box.rojo    { background: var(--rojo-suave); border-color: var(--rojo); }
+    .box.amarillo { background: var(--amarillo-s); border-color: var(--amarillo); }
+    .box.verde   { background: var(--verde-suave); border-color: var(--verde); }
+    .box.azul    { background: var(--azul-suave); border-color: var(--azul); }
+    .mt-16 { margin-top: 16px; }
+
+    /* BADGES */
+    .badge {
+      display: inline-block; font-size: 0.7rem; font-weight: 700;
+      padding: 1px 7px; border-radius: 20px; vertical-align: middle;
+    }
+    .badge.ok   { background: #dbeafe; color: #1e40af; }
+    .badge.calc { background: #bfdbfe; color: #1d4ed8; }
+    .badge.est  { background: #e0f2fe; color: #0369a1; }
+    .badge.proy { background: #f3e8ff; color: #7e22ce; }
+
+    /* INFLATION SECTION */
+    .inf-grid  { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 16px; margin: 28px 0; }
+    .inf-col   { border-radius: 12px; padding: 24px 18px; text-align: center; }
+    .inf-col.nominal    { background: #f9fafb; border: 2px solid var(--borde); }
+    .inf-col.resultado  { background: var(--rojo-suave); border: 2px solid var(--rojo); }
+    .inf-col.real       { background: var(--azul-suave); border: 2px solid var(--azul); }
+    .inf-emoji { font-size: 2rem; margin-bottom: 8px; }
+    .inf-big   { font-size: 1.7rem; font-weight: 900; }
+    .inf-col.resultado .inf-big { color: var(--rojo); }
+    .inf-col.real .inf-big { color: var(--azul); }
+    .inf-lbl   { font-size: 0.85rem; font-weight: 700; margin: 6px 0 4px; }
+    .inf-desc  { font-size: 0.78rem; color: var(--gris); }
+
+    /* TIMELINE */
+    .timeline    { margin-top: 28px; }
+    .tl-item     { display: flex; gap: 16px; padding: 16px 0; border-left: 2px solid var(--borde); margin-left: 12px; padding-left: 24px; position: relative; }
+    .tl-item.rojo  { border-color: var(--rojo); }
+    .tl-item.verde { border-color: var(--verde); }
+    .tl-dot        { position: absolute; left: -9px; top: 20px; width: 16px; height: 16px; border-radius: 50%; background: var(--gris); border: 2px solid #fff; }
+    .tl-dot.rojo   { background: var(--rojo); }
+    .tl-dot.verde  { background: var(--verde); }
+    .tl-year       { font-weight: 700; font-size: 0.88rem; min-width: 120px; }
+    .tl-text       { font-size: 0.85rem; color: #374151; }
+
+    /* CRISIS GRID */
+    .crisis-wrap  { max-width: 720px; }
+    .crisis-grid  { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; margin: 24px 0; }
+    .crisis-card  { background: var(--rojo-suave); border: 1px solid #fecaca; border-radius: 10px; padding: 18px; }
+    .crisis-card h3 { font-size: 0.88rem; font-weight: 700; margin: 8px 0 6px; }
+    .crisis-card p  { font-size: 0.82rem; color: #374151; }
+    .crisis-icon  { font-size: 1.5rem; }
+
+    /* CTA GRID */
+    .cta-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px; margin-top: 24px; }
+
+    /* SOURCES */
+    .sources-wrap  { background: var(--gris-suave); border-top: 1px solid var(--borde); padding: 48px 24px; }
+    .sources-inner { max-width: 860px; margin: 0 auto; }
+    .src-item      { font-size: 0.82rem; color: #374151; border-bottom: 1px solid var(--borde); padding: 12px 0; }
+    .src-meta      { font-size: 0.78rem; color: var(--gris); padding-top: 20px; line-height: 1.8; }
+
+    /* FOOTER */
+    footer {
+      background: #111827; color: #9ca3af; text-align: center;
+      padding: 28px 24px; font-size: 0.8rem; line-height: 1.8;
+    }
+    footer strong { color: #fff; }
+    .version-badge {
+      display: inline-block; background: #374151; color: #d1d5db;
+      font-size: 0.7rem; padding: 2px 8px; border-radius: 12px; margin-left: 8px; vertical-align: middle;
+    }
+
+    /* TABLE ARANCELES */
+    .tbl-arancel { width: 100%; border-collapse: collapse; font-size: 0.84rem; margin-top: 16px; }
+    .tbl-arancel th { background: var(--azul-suave); color: var(--azul); padding: 10px 14px; text-align: left; font-weight: 700; border-bottom: 2px solid var(--borde); }
+    .tbl-arancel td { padding: 10px 14px; border-bottom: 1px solid var(--borde); vertical-align: top; }
+    .tbl-arancel tr:last-child td { border-bottom: none; }
+    .tbl-arancel tr:hover td { background: var(--gris-suave); }
+
+    /* COMPARE BARS */
+    .compare-bar { margin: 16px 0; }
+    .compare-row { display: flex; align-items: center; gap: 12px; margin: 8px 0; }
+    .compare-label { width: 230px; font-size: 0.81rem; color: var(--texto); flex-shrink: 0; }
+    .compare-track { flex: 1; background: #f3f4f6; border-radius: 6px; height: 28px; position: relative; overflow: hidden; }
+    .compare-fill  { height: 100%; border-radius: 6px; display: flex; align-items: center; justify-content: flex-end; padding-right: 10px; font-size: 0.73rem; font-weight: 700; color: #fff; white-space: nowrap; transition: width .6s; }
+    .compare-divider { border: none; border-top: 1px dashed var(--borde); margin: 10px 0; }
+    .compare-note { font-size: 0.75rem; color: var(--gris); font-style: italic; }
+
+    /* 2-col chart grid */
+    .chart-2col { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+
+    /* NAV HAMBURGUESA */
+    #nav-toggle {
+      display: none; background: none; border: none; cursor: pointer;
+      font-size: 1.4rem; color: var(--texto); padding: 4px 8px;
+      line-height: 1;
+    }
+
+    /* ===== RESPONSIVE 768px ===== */
+    @media (max-width: 768px) {
+      /* Nav → hamburguesa */
+      #nav-toggle { display: block; }
+      .nav-links {
+        display: none; flex-direction: column; gap: 0;
+        position: absolute; top: 52px; left: 0; right: 0;
+        background: #fff; border-bottom: 1px solid var(--borde);
+        z-index: 99; padding: 8px 0;
+        box-shadow: 0 4px 16px rgba(0,0,0,.08);
+      }
+      .nav-links.open { display: flex; }
+      .nav-links li { width: 100%; }
+      .nav-links a {
+        display: block; padding: 12px 24px;
+        font-size: 0.95rem; border-bottom: 1px solid var(--borde);
+      }
+      .nav-links li:last-child a { border-bottom: none; }
+
+      /* Secciones */
+      section { padding: 40px 0; }
+      .container { padding: 0 16px; }
+      .hero { padding: 44px 16px 36px; }
+      .resumen-wrap { padding: 36px 0; }
+
+      /* Gráficos */
+      .chart-box     { height: 240px; }
+      .chart-box.sm  { height: 180px; }
+      .chart-2col    { grid-template-columns: 1fr; }
+      .chart-card    { padding: 16px; }
+
+      /* KPI grid */
+      .kpi-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
+      .kpi { padding: 14px; }
+      .kpi-num { font-size: 1.5rem; }
+
+      /* Timeline */
+      .tl-year { min-width: 80px; font-size: 0.82rem; }
+
+      /* Compare bars */
+      .compare-label { width: 120px; font-size: 0.72rem; }
+
+      /* Indicadores en bloque 1-2-3 */
+      .indicador { flex-direction: column; gap: 6px; }
+      .ind-badge { min-width: auto; align-self: flex-start; }
+
+      /* Tabla aranceles: scroll horizontal */
+      .tbl-arancel-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+      .tbl-arancel { min-width: 480px; }
+
+      /* Acc toolbar: más chico */
+      .acc-toolbar { bottom: 12px; right: 12px; padding: 8px 6px; gap: 5px; }
+      .acc-btn { width: 36px; height: 36px; font-size: 0.78rem; }
+    }
+
+    /* ===== RESPONSIVE 480px ===== */
+    @media (max-width: 480px) {
+      .kpi-grid { grid-template-columns: 1fr; }
+      .dos-cajas { grid-template-columns: 1fr; }
+      .pagos-grid { grid-template-columns: 1fr; }
+      .crisis-grid { grid-template-columns: 1fr; }
+      .cta-grid { grid-template-columns: 1fr; }
+      .chart-box { height: 210px; }
+      h2 { font-size: 1.3rem; }
+      .lead { font-size: 0.95rem; }
+      .hero-ctas { flex-direction: column; align-items: center; }
+      .btn-pri, .btn-sec { width: 100%; max-width: 280px; text-align: center; }
+      .bloque-header { margin-top: 28px; }
+    }
+
+    /* ===== SECCIÓN RESUMEN SENCILLO ===== */
+    .resumen-wrap { background: #f0f7ff; border-bottom: 2px solid #bfdbfe; padding: 56px 0; }
+    .bloque-header { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; margin-top: 40px; }
+    .bloque-header:first-of-type { margin-top: 0; }
+    .bloque-num { width: 34px; height: 34px; border-radius: 50%; background: var(--azul); color: #fff; font-weight: 900; font-size: 1rem; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .bloque-title { font-weight: 800; font-size: 1.05rem; }
+    .bloque-divider { border: none; border-top: 1px solid #bfdbfe; margin: 36px 0; }
+    .indicadores { display: flex; flex-direction: column; gap: 12px; margin-top: 8px; }
+    .indicador { display: flex; align-items: flex-start; gap: 14px; padding: 14px 16px; border-radius: 10px; background: #fff; border: 1px solid var(--borde); }
+    .ind-icon  { font-size: 1.3rem; flex-shrink: 0; padding-top: 2px; }
+    .ind-texto { flex: 1; }
+    .ind-titulo { font-weight: 700; font-size: 0.9rem; margin-bottom: 3px; }
+    .ind-desc  { font-size: 0.82rem; color: #374151; line-height: 1.55; }
+    .ind-badge { flex-shrink: 0; padding: 6px 12px; border-radius: 8px; font-size: 0.74rem; font-weight: 700; text-align: center; line-height: 1.4; min-width: 90px; }
+    .ind-badge.sube   { background: #dcfce7; color: #15803d; }
+    .ind-badge.baja   { background: #fee2e2; color: #dc2626; }
+    .ind-badge.alerta { background: #fef9c3; color: #92400e; }
+    .resumen-cta { text-align: center; margin-top: 36px; padding-top: 24px; border-top: 1px solid #bfdbfe; }
+    .resumen-cta a { color: var(--azul); font-weight: 700; font-size: 0.92rem; text-decoration: none; }
+    .resumen-cta a:hover { text-decoration: underline; }
+
+    /* COMPARACIÓN DOS CAJAS */
+    .dos-cajas { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 20px 0; }
+    @media(max-width:480px) { .dos-cajas { grid-template-columns: 1fr; } }
+    .caja-anio { border-radius: 12px; padding: 20px 18px; }
+    .caja-anio.pico { background: var(--verde-suave); border: 2px solid var(--verde); }
+    .caja-anio.piso { background: var(--rojo-suave); border: 2px solid var(--rojo); }
+    .caja-tag  { font-size: 0.78rem; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; margin-bottom: 10px; }
+    .caja-anio.pico .caja-tag { color: var(--verde); }
+    .caja-anio.piso .caja-tag { color: var(--rojo); }
+    .caja-monto  { font-size: 1.9rem; font-weight: 900; line-height: 1.1; }
+    .caja-anio.pico .caja-monto { color: var(--verde); }
+    .caja-anio.piso .caja-monto { color: var(--rojo); }
+    .caja-sub    { font-size: 0.74rem; color: var(--gris); margin-bottom: 10px; }
+    .caja-persona { font-size: 0.87rem; font-weight: 700; margin-bottom: 8px; }
+    .caja-conclusion { font-size: 0.81rem; color: #374151; line-height: 1.5; border-top: 1px solid rgba(0,0,0,.08); padding-top: 10px; margin-top: 8px; }
+
+    /* PAGOS TABLE */
+    .pagos-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; margin: 20px 0; }
+    .pagos-card { border-radius: 10px; padding: 18px; border: 1px solid var(--borde); }
+    .pagos-card.ok    { background: var(--verde-suave); border-color: #bbf7d0; }
+    .pagos-card.warn  { background: var(--amarillo-s); border-color: #fde68a; }
+    .pagos-card.alert { background: var(--rojo-suave); border-color: #fecaca; }
+    .pagos-card h4    { font-size: 0.85rem; font-weight: 700; margin-bottom: 6px; }
+    .pagos-card p     { font-size: 0.8rem; color: #374151; }
+    .pagos-big        { font-size: 1.6rem; font-weight: 900; margin-bottom: 4px; }
+
+    /* ===== BANNER EN CONSTRUCCIÓN ===== */
+    .banner-wip {
+      background: #fef9c3; border-bottom: 1px solid #fde68a;
+      color: #92400e; font-size: 0.78rem; font-weight: 600;
+      text-align: center; padding: 7px 16px;
+      letter-spacing: .01em;
+    }
+    .banner-wip a { color: #92400e; text-decoration: underline; }
+
+    /* ===== BARRA DE ACCESIBILIDAD ===== */
+    .acc-toolbar {
+      position: fixed; bottom: 20px; right: 20px; z-index: 999;
+      display: flex; flex-direction: column; gap: 6px;
+      background: #fff; border: 1px solid var(--borde);
+      border-radius: 14px; padding: 10px 8px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.12);
+    }
+    .acc-btn {
+      width: 40px; height: 40px; border-radius: 9px;
+      border: 1px solid var(--borde); background: #f9fafb;
+      cursor: pointer; font-size: 0.85rem; font-weight: 700;
+      color: var(--texto); display: flex; align-items: center; justify-content: center;
+      transition: background 0.15s, color 0.15s;
+      line-height: 1;
+    }
+    .acc-btn:hover  { background: var(--azul); color: #fff; border-color: var(--azul); }
+    .acc-btn.activo { background: var(--azul); color: #fff; border-color: var(--azul); }
+    .acc-toolbar-label {
+      font-size: 0.58rem; font-weight: 600; letter-spacing: .04em;
+      text-align: center; color: var(--gris); text-transform: uppercase;
+      padding-bottom: 2px;
+    }
+
+    /* ===== ALTO CONTRASTE ===== */
+    body.alto-contraste {
+      background: #000 !important; color: #fff !important;
+    }
+    body.alto-contraste nav,
+    body.alto-contraste .section-hero { background: #000 !important; }
+    body.alto-contraste nav { border-bottom: 1px solid #555 !important; }
+    body.alto-contraste .nav-logo,
+    body.alto-contraste .nav-links a { color: #fff !important; }
+    body.alto-contraste .nav-links a:hover { color: #ff0 !important; }
+    body.alto-contraste section { background: #000 !important; }
+    body.alto-contraste .card,
+    body.alto-contraste .box,
+    body.alto-contraste .indicador,
+    body.alto-contraste .dos-cajas .caja,
+    body.alto-contraste .pagos-card { background: #111 !important; border-color: #555 !important; color: #fff !important; }
+    body.alto-contraste h1,
+    body.alto-contraste h2,
+    body.alto-contraste h3,
+    body.alto-contraste p,
+    body.alto-contraste li,
+    body.alto-contraste .card p,
+    body.alto-contraste .section-label { color: #fff !important; }
+    body.alto-contraste .chart-nota { color: #ccc !important; }
+    body.alto-contraste .acc-toolbar { background: #111; border-color: #555; }
+    body.alto-contraste .acc-btn { background: #222; color: #fff; border-color: #555; }
+    body.alto-contraste .acc-btn:hover,
+    body.alto-contraste .acc-btn.activo { background: #ff0; color: #000; border-color: #ff0; }
+  </style>
+</head>
+<body>
+
+<!-- BANNER EN CONSTRUCCIÓN -->
+<div class="banner-wip" role="status">
+  🚧 Sitio en construcción — los datos y visualizaciones están siendo validados.
+</div>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo">Datos en <span>común</span></div>
+  <button id="nav-toggle" aria-label="Abrir menú" aria-expanded="false" onclick="toggleNav()">☰</button>
+  <ul class="nav-links" id="nav-links">
+    <li><a href="#resumen" style="color:var(--azul); font-weight:700;">Resumen</a></li>
+    <li><a href="#sistema">El sistema</a></li>
+    <li><a href="#presupuesto">Presupuesto</a></li>
+    <li><a href="#persona">Por persona</a></li>
+    <li><a href="#aranceles">Aranceles</a></li>
+    <li><a href="#pagos">Pagos</a></li>
+    <li><a href="#historia">Historia</a></li>
+    <li><a href="#fuentes">Fuentes</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="container">
+    <div class="hero-tag">🇦🇷 Datos abiertos · Información pública · Argentina</div>
+    <h1>El presupuesto de <span>discapacidad</span> en Argentina</h1>
+    <p>Más de 1,2 millones de personas dependen de esta partida presupuestaria. Presentamos los datos públicos del Estado de un modo que más personas puedan entenderlos, usarlos y apropiarlos.</p>
+    <div class="hero-ctas">
+      <a href="#resumen" class="btn-pri">Entender en 2 minutos</a>
+      <a href="#fuentes" class="btn-sec">Ver fuentes</a>
+    </div>
+  </div>
+</div>
+
+<!-- ===== TE LO EXPLICO SENCILLO ===== -->
+<div style="background:#f8f9fa; border-bottom:2px solid var(--borde);" id="resumen">
+<div class="container">
+<section style="padding:0;">
+  <div class="label" style="color:var(--azul-med);">El resumen</div>
+  <h2>Te lo explico sencillo, pero con datos</h2>
+  <p class="lead" style="margin-bottom:0;">Tres preguntas, tres respuestas. Sin tecnicismos. Todos los datos tienen fuente oficial verificable.</p>
+
+  <!-- BLOQUE 1 -->
+  <div class="bloque-header" style="margin-top:36px;">
+    <div class="bloque-num">1</div>
+    <div class="bloque-title">¿El Estado está poniendo más o menos plata?</div>
+  </div>
+  <p style="font-size:0.9rem;color:#374151;margin-bottom:16px;">Comparamos el dinero real disponible por persona en 2021 (el año más alto) contra 2025 (hoy). Ambos valores están en pesos de hoy, con la inflación ya descontada.</p>
+  <div class="dos-cajas">
+    <div class="caja-anio pico">
+      <div class="caja-tag">🟢 2021 — el año con más recursos</div>
+      <div class="caja-monto">$322.917</div>
+      <div class="caja-sub">por persona por mes · pesos de diciembre 2024</div>
+      <div class="caja-conclusion">Era el año con mayor inversión real en discapacidad de los últimos registros.</div>
+    </div>
+    <div class="caja-anio" style="background:var(--amarillo-s);border:2px solid var(--amarillo);">
+      <div class="caja-tag" style="color:var(--amarillo);">🟡 2025 — hoy</div>
+      <div class="caja-monto" style="color:var(--amarillo);">$286.826</div>
+      <div class="caja-sub">por persona por mes · pesos de diciembre 2024</div>
+      <div class="caja-conclusion"><strong>$36.091 menos por persona que en 2021</strong>, cada mes. Una caída del 11% en términos reales.</div>
+    </div>
+  </div>
+  <p style="font-size:0.75rem;color:var(--gris);margin-top:8px;">Cálculo: presupuesto real total ÷ beneficiarios activos ÷ 12 meses. Fuente: <a href="https://www.presupuestoabierto.gob.ar/sici/analisis-transversal-discapacidad" style="color:var(--azul);" target="_blank">API Presupuesto Abierto →</a> · <a href="https://www.indec.gob.ar/indec/web/Nivel4-Tema-2-21-143" style="color:var(--azul);" target="_blank">IPC INDEC →</a> · <a href="https://opc.gob.ar/poblacional/ejecucion-presupuestaria-de-la-inversion-social-nacional-en-personas-con-discapacidad-datos-al-31-de-diciembre-2021/" style="color:var(--azul);" target="_blank">OPC dic-2021 →</a></p>
+
+  <hr class="bloque-divider">
+
+  <!-- BLOQUE 2 -->
+  <div class="bloque-header">
+    <div class="bloque-num">2</div>
+    <div class="bloque-title">¿Alcanza lo que se destina?</div>
+  </div>
+  <p style="font-size:0.9rem;color:#374151;margin-bottom:16px;">Las barras muestran cuánto gasta el Estado por persona por mes desde 2020. La línea punteada roja es lo que cuesta <strong>una sola prestación básica</strong> según el propio precio oficial del Estado (Nomenclador ANDIS).</p>
+  <div class="chart-card" style="background:#fff;padding:20px;">
+    <div class="chart-box"><canvas id="chartResumen"></canvas></div>
+    <div style="font-size:0.82rem;color:#374151;margin-top:14px;padding-top:12px;border-top:1px solid var(--borde);">
+      📌 <strong>Importante:</strong> la mayoría de las personas con discapacidad necesita más de una prestación por mes. Ejemplos según el <a href="https://www.andis.gob.ar" style="color:var(--azul);" target="_blank">Nomenclador ANDIS →</a> (Ley 24.901):<br>
+      <span style="display:inline-block;margin-top:6px;">• Apoyo a la persona (APND) + Estimulación Temprana = <strong>$568.562/mes</strong></span><br>
+      <span style="display:inline-block;">• Centro de Día (adulto) = <strong>$741.078/mes</strong></span><br>
+      <span style="font-size:0.73rem;color:var(--gris);margin-top:4px;display:block;">Valores: Nomenclador ANDIS / CFBA, diciembre 2024.</span>
+    </div>
+  </div>
+
+  <hr class="bloque-divider">
+
+  <!-- BLOQUE 3 -->
+  <div class="bloque-header">
+    <div class="bloque-num">3</div>
+    <div class="bloque-title">¿La situación está mejorando o empeorando?</div>
+  </div>
+  <p style="font-size:0.9rem;color:#374151;margin-bottom:16px;">Tres indicadores. Sin opinión: solo los datos y su dirección.</p>
+  <div class="indicadores">
+    <div class="indicador">
+      <div class="ind-icon">💰</div>
+      <div class="ind-texto">
+        <div class="ind-titulo">Plata disponible por persona</div>
+        <div class="ind-desc">Subió desde el mínimo de 2023 ($221.000/mes), pero sigue siendo un 11% menos que en el pico de 2021 ($322.917/mes). En 2025: $286.826/mes.</div>
+      </div>
+      <div class="ind-badge alerta">↗ Recuperándose,<br>aún bajo el pico</div>
+    </div>
+    <div class="indicador">
+      <div class="ind-icon">⏳</div>
+      <div class="ind-texto">
+        <div class="ind-titulo">Tiempo para cobrar</div>
+        <div class="ind-desc">Las organizaciones prestan el servicio y esperan entre 90 y 120 días para cobrar. Muchos centros reportan no haber cobrado desde diciembre 2025.</div>
+      </div>
+      <div class="ind-badge baja">⚠️ Sin mejora</div>
+    </div>
+    <div class="indicador">
+      <div class="ind-icon">📋</div>
+      <div class="ind-texto">
+        <div class="ind-titulo">Valor de los aranceles (precio oficial por prestación)</div>
+        <div class="ind-desc">En 2025 el nomenclador no se actualizó (0%), con una inflación del 31,5%. Desde 2023, los aranceles perdieron el 57% de su valor real.</div>
+      </div>
+      <div class="ind-badge baja">↘ Deteriorándose</div>
+    </div>
+  </div>
+
+  <div class="resumen-cta">
+    <a href="#sistema">¿Cómo llegamos a estos números? Ver el análisis completo con todas las fuentes ↓</a>
+  </div>
+</section>
+</div>
+</div>
+
+<!-- ===== SISTEMA ===== -->
+<div class="container">
+<section id="sistema">
+  <div class="label">¿De qué hablamos?</div>
+  <h2>El sistema detrás de los números</h2>
+  <p class="lead">En Argentina, más de 1,2 millones de personas dependen directamente de las decisiones presupuestarias del Estado nacional para acceder a salud, educación, transporte y cuidados. Estas son las tres cifras que lo resumen.</p>
+
+  <div class="kpi-grid">
+    <div class="kpi">
+      <div class="kpi-num">1,2 M</div>
+      <div class="kpi-lbl">personas reciben pensión no contributiva por discapacidad</div>
+      <div class="kpi-src">Fuente: ANDIS, septiembre 2024</div>
+    </div>
+    <div class="kpi rojo">
+      <div class="kpi-num">132.672</div>
+      <div class="kpi-lbl">pensiones suspendidas o dadas de baja entre 2024 y marzo 2025</div>
+      <div class="kpi-src">Fuente: ANDIS / ACIJ, marzo 2025</div>
+    </div>
+    <div class="kpi naranja">
+      <div class="kpi-num">3,3% → 1,8%</div>
+      <div class="kpi-lbl">del presupuesto nacional se destinó a discapacidad: 3,3% en 2021 (máximo) y 1,8% estimado en 2025. La participación casi se redujo a la mitad.</div>
+      <div class="kpi-src">2021: <a href="https://opc.gob.ar/poblacional/ejecucion-presupuestaria-de-la-inversion-social-nacional-en-personas-con-discapacidad-datos-al-31-de-diciembre-2021/" style="color:var(--amarillo);">OPC, dic-2021 →</a> · 2025: estimado (API Presupuesto Abierto + ONP)</div>
+    </div>
+  </div>
+
+  <div class="info-card mt-16">
+    <h3>📋 ¿Por qué el Estado tiene esta obligación?</h3>
+    <p>La <strong>Ley 24.901</strong> (1997) —Sistema de Prestaciones Básicas de Atención Integral a favor de las Personas con Discapacidad— establece que el Estado debe financiar un conjunto integral de servicios: estimulación temprana, educación especial, formación laboral, centros de día, hogares, transporte y más.</p>
+    <p style="margin-top:8px;">La <strong>Agencia Nacional de Discapacidad (ANDIS)</strong>, creada en 2017, concentra el <strong>84,3%</strong> del gasto nacional vinculado a discapacidad. El <strong>ANSES</strong> aporta el 13,1% restante (pensiones contributivas por invalidez). El 2,6% está distribuido en otras jurisdicciones.</p>
+    <p style="font-size:0.78rem; color:var(--gris); margin-top: 8px;">Fuente de porcentajes: OPC — Ejecución Presupuestaria Inversión Social en Personas con Discapacidad, diciembre 2021.</p>
+  </div>
+
+  <div class="box" style="margin-top:16px;">
+    <strong>🌐 El marco internacional: Convención sobre los Derechos de las Personas con Discapacidad (CDPD)</strong><br>
+    Argentina ratificó la Convención de la ONU en 2008 (Ley 26.378) y le otorgó jerarquía constitucional en 2014. La CDPD establece que la discapacidad <em>no es una condición individual</em>: <strong>se constituye cuando una persona con condiciones permanentes encuentra barreras en su entorno</strong> — arquitectónicas, comunicacionales, económicas. Con presupuesto, esas barreras pueden reducirse. Sin él, se profundizan. La responsabilidad es de la sociedad en su conjunto, no solo de las personas y sus familias.<br><br>
+    <strong>📊 Solo el <span style="font-size:1.05em;">32,23%</span> de las personas con discapacidad en edad de trabajar está ocupada.</strong> La gran mayoría depende directamente del sistema de prestaciones que financia el Estado mediante la Ley 24.901.<br>
+    <span style="font-size:0.75rem;color:var(--gris);margin-top:6px;display:block;">Fuente: <a href="https://www.indec.gob.ar/ftp/cuadros/sociedad/estudio_discapacidad_12_18.pdf" style="color:var(--azul);" target="_blank">INDEC — Estudio nacional sobre el perfil de las personas con discapacidad, 2018 →</a></span>
+  </div>
+
+  <!-- CHART: Beneficiarios -->
+  <div class="chart-card">
+    <div class="chart-card-title">Beneficiarios de pensiones no contributivas por discapacidad (2001–2025)</div>
+    <div class="chart-card-sub">¿A cuántas personas tiene que alcanzar el presupuesto?</div>
+    <div class="chart-box"><canvas id="chartBen"></canvas></div>
+    <div class="chart-legend">
+      <div class="legend-item"><div class="legend-dot" style="background:#1e40af"></div> Dato confirmado</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#93c5fd"></div> Estimación (tendencias ACIJ/ANDIS)</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#dc2626"></div> 2025: post-suspensiones</div>
+    </div>
+    <div class="chart-nota">
+      <strong>Datos confirmados:</strong> 2001 (ANDIS registros históricos), 2015 (ACIJ/Chequeado), 2021 (OPC diciembre 2021), septiembre 2024 (ANDIS), marzo 2025 (ANDIS/ACIJ). Los años intermedios son estimaciones basadas en tendencias documentadas por ACIJ y CIPPEC.<br>
+      <strong>Nota 2007–2015:</strong> Los datos de beneficiarios de esos años provienen de registros administrativos de ANDIS, no del IPC.
+    </div>
+  </div>
+
+  <div class="box azul">
+    <strong>📌 Dato para entender la escala:</strong> Los beneficiarios de pensiones crecieron <strong>16 veces</strong> en 20 años (de 76.000 en 2001 a más de 1.200.000 en 2024). Solo para mantener el mismo nivel de servicio por persona, el presupuesto tendría que haber crecido 16 veces en términos reales. Eso es <em>antes</em> de considerar la inflación.
+  </div>
+</section>
+
+<!-- ===== INFLACION ===== -->
+<section id="inflacion">
+  <div class="label">Por qué importa la inflación</div>
+  <h2>El truco de los números grandes</h2>
+  <p class="lead">El número en pesos siempre sube. Pero eso no significa que hay más recursos. La inflación "infla" los números sin agregar nada real. Para saber si el Estado gasta más o menos, hay que eliminar el efecto de los precios.</p>
+
+  <!-- CHART: Presupuesto nominal (lo que ves) -->
+  <div class="chart-card">
+    <div class="chart-card-title">👀 Lo que parece: el presupuesto en pesos corrientes sube todos los años</div>
+    <div class="chart-card-sub">Pesos nominales (corrientes) año a año. Miles de millones. Parecería que el presupuesto creció sin parar.</div>
+    <div class="chart-box sm"><canvas id="chartNominal"></canvas></div>
+    <div class="chart-nota">
+      El número nominal del presupuesto sube siempre porque la inflación encarece todo. Entre 2021 y 2025 el número en pesos creció 15 veces. Pero ¿creció 15 veces la cantidad de tratamientos, terapias y apoyos? No. Para saberlo, hay que ajustar por inflación.<br>
+      Fuente: <a href="https://www.presupuestoabierto.gob.ar/sici/analisis-transversal-discapacidad" style="color:var(--azul);" target="_blank">API Presupuesto Abierto (mecon.gov.ar) →</a> · <a href="https://opc.gob.ar/Archivos/opendata/etiquetasdiscpacidad_presupuestario.xls" style="color:var(--azul);" target="_blank">OPC opendata XLS →</a>
+    </div>
+  </div>
+
+  <div class="box rojo" style="margin-top:24px;">
+    <strong>🚨 El truco:</strong> Entre 2021 y 2025, el presupuesto en pesos corrientes creció 15 veces. Pero la inflación acumulada en ese período superó el <strong>1.900%</strong>. En términos reales —lo que esos pesos pueden comprar— el presupuesto de 2025 equivale a lo que en 2021 eran solo $4.108 mil millones (en moneda de diciembre de 2024). Es decir: <em>casi lo mismo que en 2020, y menos que en 2021</em>.
+  </div>
+
+  <!-- Comparación concreta 2021 vs 2023 -->
+  <p style="font-weight:700; margin: 28px 0 12px;">📊 Lo que realmente pasó: el presupuesto <em>real</em> cayó en 2022–2023</p>
+  <div class="dos-cajas">
+    <div class="caja-anio pico">
+      <div class="caja-tag">🟢 2021 — año con más recursos</div>
+      <div class="caja-monto">$4.650 B</div>
+      <div class="caja-sub">pesos constantes diciembre 2024</div>
+      <div class="caja-persona">💰 $322.917 por persona por mes</div>
+      <div class="caja-conclusion">✅ Alcanzaba para pagar una terapia de apoyo a la persona (APND: $307.654/mes según nomenclador ANDIS)</div>
+    </div>
+    <div class="caja-anio piso">
+      <div class="caja-tag">🔴 2023 — año con menos recursos (−29%)</div>
+      <div class="caja-monto">$3.315 B</div>
+      <div class="caja-sub">pesos constantes diciembre 2024</div>
+      <div class="caja-persona">💸 $221.000 por persona por mes</div>
+      <div class="caja-conclusion">❌ Ya no alcanzaba para pagar ni una sola terapia mensual. La diferencia: −$101.917 por persona, cada mes.</div>
+    </div>
+  </div>
+  <p style="font-size:0.8rem; color:var(--gris); margin-top:8px;">Presupuesto real: API <a href="https://www.presupuestoabierto.gob.ar/sici/analisis-transversal-discapacidad" style="color:var(--azul);" target="_blank">Presupuesto Abierto</a> + IPC <a href="https://www.indec.gob.ar/indec/web/Nivel4-Tema-2-21-143" style="color:var(--azul);" target="_blank">INDEC →</a>  ·  Arancel APND: Nomenclador ANDIS / CFBA, dic-2024.</p>
+</section>
+
+<!-- ===== PRESUPUESTO ===== -->
+<section id="presupuesto">
+  <div class="label">El presupuesto real</div>
+  <h2>¿Cuánto valen realmente los recursos para discapacidad?</h2>
+  <p class="lead">Al ajustar por inflación, la historia cambia por completo. Los números grandes se vuelven más chicos, y los recortes se hacen visibles.</p>
+
+  <!-- CHART: Presupuesto real -->
+  <div class="chart-card">
+    <div class="chart-card-title">Inversión nacional en discapacidad — pesos constantes (base diciembre 2024)</div>
+    <div class="chart-card-sub">Miles de millones de pesos. Incluye ANDIS, ANSES y otras jurisdicciones. Fuente: Presupuesto Abierto (mecon.gov.ar) + OPC + IPC-INDEC.</div>
+    <div class="chart-box"><canvas id="chartPres"></canvas></div>
+    <div class="chart-legend">
+      <div class="legend-item"><div class="legend-dot" style="background:#1e40af"></div> Confirmado (Informe OPC 2021)</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#3b82f6"></div> Calculado (API Presupuesto Abierto + IPC INDEC)</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#93c5fd"></div> Estimado (pre-etiquetado 2018-2019)</div>
+    </div>
+    <div class="chart-nota">
+      <strong>Metodología y fuentes por año:</strong><br>
+      <strong>2020–2024</strong> <span class="badge calc">calculado</span>: <a href="https://www.presupuestoabierto.gob.ar/sici/analisis-transversal-discapacidad" style="color:var(--azul);" target="_blank">API Presupuesto Abierto (mecon.gov.ar) →</a> — devengado por año deflactado por IPC-INDEC.<br>
+      <strong>2021</strong> <span class="badge ok">confirmado</span>: <a href="https://opc.gob.ar/poblacional/ejecucion-presupuestaria-de-la-inversion-social-nacional-en-personas-con-discapacidad-datos-al-31-de-diciembre-2021/" style="color:var(--azul);" target="_blank">Informe OPC dic-2021 →</a> — $353.366 M nominales × 13,16 = $4.650.000 M const. 2024. Representa el 3,3% del gasto APN y el 0,8% del PBI.<br>
+      <strong>2025</strong> <span class="badge calc">calculado</span>: <a href="https://opc.gob.ar/Archivos/opendata/etiquetasdiscpacidad_presupuestario.xls" style="color:var(--azul);" target="_blank">OPC opendata XLS →</a> — devengado ajustado por porcentaje_financiero: $5.400.663 M nominales ÷ 1,315 (IPC 2025: 31,5%) = $4.108.000 M const. 2024.<br>
+      <strong>2018–2019</strong> <span class="badge est">estimados</span>: tendencias ACIJ/ANDIS pre-etiquetado transversal (metodología OPC iniciada en 2021).<br>
+      <strong>Deflactores <a href="https://www.indec.gob.ar/indec/web/Nivel4-Tema-2-21-143" style="color:var(--azul);" target="_blank">IPC-INDEC →</a> dic-dic:</strong> 2020→2024: ×19,86 | 2021→2024: ×13,16 | 2022→2024: ×6,757 | 2023→2024: ×2,17 | 2025→2024: ÷1,315.
+    </div>
+  </div>
+
+  <div class="kpi-grid">
+    <div class="kpi rojo">
+      <div class="kpi-num">−29%</div>
+      <div class="kpi-lbl">cayó el presupuesto real en 2023 (mínimo histórico vs. pico 2021)</div>
+      <div class="kpi-src">Calculado: API Presupuesto Abierto + IPC INDEC</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-num">0,8%</div>
+      <div class="kpi-lbl">del PBI destinado a discapacidad en 2021 (el año más alto)</div>
+      <div class="kpi-src">Fuente: OPC, diciembre 2021</div>
+    </div>
+    <div class="kpi naranja">
+      <div class="kpi-num">81%</div>
+      <div class="kpi-lbl">del presupuesto de ANDIS va a pensiones no contributivas</div>
+      <div class="kpi-src">Fuente: OPC, 2021</div>
+    </div>
+  </div>
+
+  <div class="box">
+    <strong>📌 Para entenderlo sin números:</strong> Si en 2021 el Estado podía "comprar" 100 tratamientos, terapias y apoyos con su presupuesto de discapacidad, en 2024 ese mismo presupuesto real solo alcanza para 92. Y tiene que atender al mismo número —o más— de personas.
+  </div>
+
+  <!-- CHART: % del presupuesto nacional -->
+  <div class="chart-card">
+    <div class="chart-card-title">Presupuesto de discapacidad como % del presupuesto nacional total</div>
+    <div class="chart-card-sub">¿Cuánto prioriza el Estado este tema en relación a todo lo que gasta?</div>
+    <div class="chart-box"><canvas id="chartPct"></canvas></div>
+    <div class="chart-legend">
+      <div class="legend-item"><div class="legend-dot" style="background:#1e40af"></div> Confirmado (OPC)</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#93c5fd"></div> Estimado</div>
+    </div>
+    <div class="chart-nota">
+      <strong>2021</strong> <span class="badge ok">confirmado</span>: 3,3% del presupuesto nacional total — OPC "Ejecución Presupuestaria Inversión Social en Personas con Discapacidad, dic-2021". Demás años: estimaciones basadas en variaciones reales reportadas por OPC y ACIJ.
+    </div>
+  </div>
+
+  <!-- CHART: % del PBI -->
+  <div class="chart-card" style="margin-top: 24px;">
+    <div class="chart-card-title">Presupuesto de discapacidad como % del PBI — 2018 a 2025</div>
+    <div class="chart-card-sub">Por cada $100 que produce la economía argentina, ¿cuántos centavos van a discapacidad?</div>
+    <div class="chart-box sm"><canvas id="chartPBI"></canvas></div>
+    <div class="chart-legend">
+      <div class="legend-item"><div class="legend-dot" style="background:#1e40af"></div> Confirmado (OPC 2021)</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#93c5fd"></div> Estimado (presupuesto real / PBI constante)</div>
+    </div>
+    <div class="chart-nota">
+      <strong>2021: 0,80%</strong> <span class="badge ok">confirmado</span> — <a href="https://opc.gob.ar/poblacional/ejecucion-presupuestaria-de-la-inversion-social-nacional-en-personas-con-discapacidad-datos-al-31-de-diciembre-2021/" style="color:var(--azul);" target="_blank">Informe OPC dic-2021 →</a>. Los demás años son estimaciones usando el presupuesto real en pesos constantes y el PBI real (INDEC). Referencia: la OPS/OMS recomienda que los países destinen entre 1% y 3% del PBI a discapacidad e inclusión.
+    </div>
+  </div>
+
+  <!-- CONTEXTO: % no es todo -->
+  <div class="box amarillo" style="margin-top: 24px;">
+    <strong>⚠️ ¿Bajar el % significa que se asignó menos plata? No necesariamente.</strong><br>
+    Un porcentaje menor del presupuesto total podría explicarse porque el presupuesto nacional creció más rápido —no por un recorte real. Por eso este indicador solo es útil si se lee junto con el valor real en pesos constantes.<br><br>
+    <strong>En el caso de Argentina (2022–2023):</strong> ambos cayeron al mismo tiempo: el porcentaje Y el valor real en pesos constantes. La reducción no fue solo relativa sino absoluta. En 2024, el porcentaje sigue bajo (2,2%) aunque el valor real se recuperó (+29% vs 2023). El indicador más honesto es el <strong>gasto por persona en pesos constantes</strong> — ver sección siguiente.
+  </div>
+
+  <!-- CHART: Composición por función 2024 -->
+  <div class="chart-card" style="margin-top: 28px;">
+    <div class="chart-card-title">¿En qué se gasta? Composición del presupuesto de discapacidad por función</div>
+    <div class="chart-card-sub">Distribución del gasto por área del Estado — 2024. Fuente: API Presupuesto Abierto (mecon.gov.ar).</div>
+    <div class="chart-2col">
+      <div>
+        <div style="font-size:0.82rem; font-weight:700; margin-bottom:8px; text-align:center;">2024 — $4.276.519 M nominales</div>
+        <div style="height: 220px;"><canvas id="chartFuncion2024"></canvas></div>
+      </div>
+      <div>
+        <div style="font-size:0.82rem; font-weight:700; margin-bottom:8px; text-align:center;">2025 — $5.768.227 M nominales (API)</div>
+        <div style="height: 220px;"><canvas id="chartFuncion2025"></canvas></div>
+      </div>
+    </div>
+    <div class="chart-nota" style="margin-top: 16px;">
+      <strong>Seguridad Social (~85%):</strong> principalmente prestaciones ANDIS (centros, terapias, apoyos) y pensiones no contributivas por discapacidad.<br>
+      <strong>Salud (~14%):</strong> financiamiento de cobertura médica, PROFE y prestaciones sanitarias.<br>
+      <strong>Asistencia Social y Trabajo (~1%):</strong> talleres protegidos, programas de inserción laboral.<br>
+      Fuente: API Presupuesto Abierto — endpoint <code>/transversal/a-que-se-destina-el-gasto/discapacidad/{año}</code>. Dato recuperado marzo 2026.
+    </div>
+  </div>
+
+  <!-- CHART: IPC Inflación histórica -->
+  <div class="chart-card" style="margin-top:28px;">
+    <div class="chart-card-title">Inflación anual en Argentina (IPC-INDEC, % dic-dic) — 2004 a 2025</div>
+    <div class="chart-card-sub">El contexto que explica por qué los pesos de antes y los pesos de hoy no son lo mismo</div>
+    <div class="chart-box sm"><canvas id="chartIPC"></canvas></div>
+    <div class="chart-legend" style="margin-top:12px;">
+      <div class="legend-item"><div class="legend-dot" style="background:rgba(30,64,175,0.75)"></div> Inflación baja–moderada (INDEC confiable)</div>
+      <div class="legend-item"><div class="legend-dot" style="background:rgba(245,158,11,0.75)"></div> ⚠️ Período cuestionado (2007–2015)</div>
+      <div class="legend-item"><div class="legend-dot" style="background:rgba(220,38,38,0.85)"></div> Inflación alta / extrema</div>
+    </div>
+    <div class="chart-nota">
+      <strong>Período 2007–2015 ⚠️:</strong> El INDEC fue intervenido durante estos años. El dato alternativo (IPC-9 provincias) estima inflaciones entre 16% y 38% anual. Pasar el cursor sobre las barras muestra ambas cifras.<br>
+      Fuente: INDEC, series IPC-GBA (2004–2016) e IPC-Nacional (2017–2025). IPC 2025: 31,5% (publicado enero 2026). <a href="https://www.indec.gob.ar/indec/web/Nivel4-Tema-2-21-143" style="color:var(--azul);" target="_blank">indec.gob.ar →</a>
+    </div>
+  </div>
+</section>
+</div><!-- /container -->
+
+<!-- ===== PERSONA ===== -->
+<div style="background: var(--azul-suave); border-top: 1px solid #bfdbfe; border-bottom: 1px solid #bfdbfe;">
+<div class="container">
+<section id="persona">
+  <div class="label">El indicador más honesto</div>
+  <h2>¿Cuánto llega por persona, por mes?</h2>
+  <p class="lead">El total en pesos y el porcentaje del presupuesto no dicen todo. El indicador que más importa es: ¿cuántos pesos reales asigna el Estado por cada persona que depende del sistema, por mes?</p>
+
+  <div class="kpi-grid">
+    <div class="kpi verde">
+      <div class="kpi-num">$322.917</div>
+      <div class="kpi-lbl">por persona / mes en 2021 — máximo histórico</div>
+      <div class="kpi-src">Calculado: OPC 2021 + ANDIS beneficiarios + IPC INDEC</div>
+    </div>
+    <div class="kpi rojo">
+      <div class="kpi-num">$221.000</div>
+      <div class="kpi-lbl">por persona / mes en 2023 — mínimo histórico (−32% vs. 2021)</div>
+      <div class="kpi-src">Calculado: API Presupuesto Abierto + IPC INDEC</div>
+    </div>
+    <div class="kpi naranja">
+      <div class="kpi-num">$286.826</div>
+      <div class="kpi-lbl">por persona / mes en 2025 — aún 11% por debajo del pico</div>
+      <div class="kpi-src">Calculado: OPC opendata dic-2025 + IPC INDEC</div>
+    </div>
+  </div>
+
+  <div class="chart-card">
+    <div class="chart-card-title">Gasto mensual por persona beneficiaria — pesos constantes dic-2024</div>
+    <div class="chart-card-sub">Presupuesto real total ÷ beneficiarios activos ÷ 12 meses. El único indicador que combina volumen de recursos y cantidad de personas.</div>
+    <div class="chart-box"><canvas id="chartGPP"></canvas></div>
+    <div class="chart-legend">
+      <div class="legend-item"><div class="legend-dot" style="background:#1e40af"></div> Confirmado (OPC 2021)</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#3b82f6"></div> Calculado (API Presupuesto Abierto + IPC INDEC)</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#93c5fd"></div> Estimado</div>
+    </div>
+    <div class="chart-nota">
+      Fórmula: (presupuesto real anual en pesos const. dic-2024) ÷ (beneficiarios activos ese año) ÷ 12.<br>
+      Beneficiarios: ANDIS sept-2024 (1.200.000), OPC dic-2021 (1.200.000), estimaciones ACIJ para años intermedios (2022: ~1.220.000; 2023: ~1.250.000). 2025: 1.193.523 (post-suspensiones, ANDIS/ACIJ mar-2025).<br>
+      <strong>Fuentes:</strong> API Presupuesto Abierto (mecon.gov.ar), Informe OPC dic-2021, ANDIS, IPC INDEC.
+    </div>
+  </div>
+
+  <!-- Comparación visual con aranceles -->
+  <div class="chart-card" style="margin-top: 28px;">
+    <div class="chart-card-title">¿Hasta dónde alcanza ese presupuesto? — Comparación con aranceles ANDIS (dic-2024)</div>
+    <div class="chart-card-sub">El presupuesto mensual por persona comparado con el costo de las prestaciones que establece la Ley 24.901.</div>
+
+    <div class="compare-bar">
+      <p style="font-size:0.8rem; font-weight:700; color:var(--azul); margin-bottom:8px;">PRESUPUESTO DEL ESTADO POR PERSONA / MES</p>
+      <div class="compare-row">
+        <div class="compare-label">💰 2021 — máximo histórico</div>
+        <div class="compare-track">
+          <div class="compare-fill" style="width:43.5%; background:var(--verde);">$322.917</div>
+        </div>
+      </div>
+      <div class="compare-row">
+        <div class="compare-label">💰 2024 — recuperación parcial</div>
+        <div class="compare-track">
+          <div class="compare-fill" style="width:40.1%; background:var(--azul-calc);">$297.014</div>
+        </div>
+      </div>
+      <div class="compare-row">
+        <div class="compare-label">💰 2023 — mínimo histórico</div>
+        <div class="compare-track">
+          <div class="compare-fill" style="width:29.8%; background:var(--rojo);">$221.000</div>
+        </div>
+      </div>
+
+      <hr class="compare-divider" style="margin: 14px 0;">
+      <p style="font-size:0.8rem; font-weight:700; color:#374151; margin-bottom:8px;">ARANCELES NOMENCLADOR ANDIS — COSTO POR PRESTACIÓN/MES</p>
+      <div class="compare-row">
+        <div class="compare-label">🧠 Estimulación Temprana</div>
+        <div class="compare-track">
+          <div class="compare-fill" style="width:35.2%; background:#94a3b8;">$260.908</div>
+        </div>
+      </div>
+      <div class="compare-row">
+        <div class="compare-label">🤝 Apoyo a la persona (APND)</div>
+        <div class="compare-track">
+          <div class="compare-fill" style="width:41.5%; background:#64748b;">$307.654</div>
+        </div>
+      </div>
+      <div class="compare-row">
+        <div class="compare-label">🎓 SAIE (Integración Escolar)</div>
+        <div class="compare-track">
+          <div class="compare-fill" style="width:64.2%; background:#475569;">$475.830</div>
+        </div>
+      </div>
+      <div class="compare-row">
+        <div class="compare-label">🏥 Hospital de Día (jornada doble)</div>
+        <div class="compare-track">
+          <div class="compare-fill" style="width:85.5%; background:#334155;">$632.958</div>
+        </div>
+      </div>
+      <div class="compare-row">
+        <div class="compare-label">🏢 Centro de Día</div>
+        <div class="compare-track">
+          <div class="compare-fill" style="width:100%; background:#1e293b;">$741.078 ↑</div>
+        </div>
+      </div>
+    </div>
+    <p class="compare-note" style="margin-top:8px;">Escala normalizada a $741.078 = 100%. Aranceles en pesos corrientes dic-2024. Fuente: CFBA / Nomenclador ANDIS, Resolución Conjunta ANDIS/Ministerio de Salud.</p>
+
+    <div class="chart-nota">
+      Todas las barras representan el costo de cubrir <em>una sola prestación</em> mensual según el nomenclador oficial. Una persona con discapacidad generalmente accede a múltiples prestaciones simultáneas (por ejemplo: estimulación temprana + terapia fonoaudiológica + transporte). El presupuesto mensual por persona de ningún año fue suficiente para cubrir más que una prestación básica.
+    </div>
+  </div>
+
+  <div class="box rojo">
+    <strong>🚨 El dato más impactante:</strong> En 2023, el Estado asignó <strong>$221.000 por persona por mes</strong>. Una sola sesión mensual de Apoyo a la Persona (APND) cuesta <strong>$307.654</strong> (dic-2024). El presupuesto por persona no alcanzaba para pagar ni una prestación. El sistema Ley 24.901 solo funciona porque los prestadores y las familias sostienen la diferencia. Cuando ya no pueden, cierran.
+  </div>
+</section>
+</div>
+</div>
+
+<!-- ===== ARANCELES ===== -->
+<div class="container">
+<section id="aranceles">
+  <div class="label">Lo que paga el Estado por prestación</div>
+  <h2>Aranceles: el nomenclador ANDIS vs. la inflación</h2>
+  <p class="lead">El Estado define cuánto paga por cada prestación de la Ley 24.901 a través del <strong>Nomenclador ANDIS</strong>. Sus actualizaciones no siguieron el ritmo de la inflación, y los prestadores quedaron financiando el sistema con recursos que valen cada vez menos.</p>
+
+  <div class="kpi-grid">
+    <div class="kpi rojo">
+      <div class="kpi-num">−57%</div>
+      <div class="kpi-lbl">perdió de valor real el nomenclador desde enero 2023 a diciembre 2025</div>
+      <div class="kpi-src">Calculado: actualizaciones ANDIS vs. IPC INDEC acumulado 2023–2025</div>
+    </div>
+    <div class="kpi naranja">
+      <div class="kpi-num">0%</div>
+      <div class="kpi-lbl">actualización del nomenclador en 2025, mientras la inflación fue del 31,5%</div>
+      <div class="kpi-src">Fuente: ANDIS / Infobae, junio 2025</div>
+    </div>
+    <div class="kpi rojo">
+      <div class="kpi-num">+147%</div>
+      <div class="kpi-lbl">más debería haber subido el nomenclador para equiparar la inflación 2023–mid2025</div>
+      <div class="kpi-src">Fuente: Infobae, "Las prestaciones de discapacidad", junio 2025</div>
+    </div>
+  </div>
+
+  <!-- CHART: Nomenclador vs IPC -->
+  <div class="chart-card">
+    <div class="chart-card-title">Actualización del Nomenclador ANDIS vs. inflación anual (IPC-INDEC)</div>
+    <div class="chart-card-sub">Porcentaje de aumento anual. La brecha entre las dos barras representa el atraso real acumulado del sistema.</div>
+    <div class="chart-box"><canvas id="chartArancel"></canvas></div>
+    <div class="chart-legend">
+      <div class="legend-item"><div class="legend-dot" style="background:#1e40af"></div> Actualización nomenclador ANDIS (%)</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#dc2626"></div> Inflación anual IPC-INDEC (%)</div>
+    </div>
+    <div class="chart-nota">
+      <strong>2023:</strong> Nomenclador +93% vs. inflación +211,4%. Brecha: −118 puntos porcentuales.<br>
+      <strong>2024:</strong> Nomenclador +99% vs. inflación +117%. Brecha: −18 puntos (el año de menor atraso).<br>
+      <strong>2025:</strong> Nomenclador 0% vs. inflación +31,5%. Sin ninguna actualización pese a la inflación continua.<br>
+      <strong>Pérdida acumulada 2023–2025:</strong> El nomenclador creció 284% (×3,84) mientras la inflación fue 788% (×8,88). Los aranceles valen 57% menos en términos reales que en enero 2023.<br>
+      Fuente: ANDIS, Resolución Conjunta ANDIS/Ministerio de Salud; IPC INDEC; Infobae junio 2025.
+    </div>
+  </div>
+
+  <!-- Tabla de aranceles -->
+  <div class="chart-card" style="margin-top: 28px;">
+    <div class="chart-card-title">Nomenclador ANDIS: valores vigentes por prestación (diciembre 2024)</div>
+    <div class="chart-card-sub">¿Cuánto paga el Estado por cada servicio cubierto bajo la Ley 24.901?</div>
+    <div class="tbl-arancel-wrap"><table class="tbl-arancel">
+      <thead>
+        <tr>
+          <th>Prestación</th>
+          <th>Arancel mensual (dic-2024)</th>
+          <th>Situación</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Estimulación Temprana</strong></td>
+          <td>$260.908</td>
+          <td style="color:var(--amarillo);">⚠️ Valor real 57% menor que en enero 2023</td>
+        </tr>
+        <tr>
+          <td><strong>Apoyo a la Persona (APND)</strong> — 4 sesiones/mes</td>
+          <td>$307.654</td>
+          <td style="color:var(--rojo);">🚨 En 2023, el presupuesto por persona ($221K) no cubría ni este servicio</td>
+        </tr>
+        <tr>
+          <td><strong>SAIE</strong> — Servicio de Apoyo a la Integración Escolar</td>
+          <td>$475.830</td>
+          <td style="color:var(--amarillo);">⚠️ Valor real cayó más del 50% desde 2022</td>
+        </tr>
+        <tr>
+          <td><strong>Hospital de Día — Jornada Doble</strong></td>
+          <td>$632.958</td>
+          <td style="color:var(--rojo);">🚨 Centros reportan que no cubre costos operativos reales</td>
+        </tr>
+        <tr>
+          <td><strong>Centro de Día</strong></td>
+          <td>$741.078</td>
+          <td style="color:var(--rojo);">🚨 Brecha estimada con costos reales: 40–60% (organizaciones de la sociedad civil)</td>
+        </tr>
+      </tbody>
+    </table></div><!-- /.tbl-arancel-wrap -->
+    <div class="chart-nota">
+      Fuente: CFBA (Colegio de Fonoaudiólogos de Buenos Aires), diciembre 2024. Valores confirmados por Resolución Conjunta ANDIS / Ministerio de Salud. <a href="https://www.cfba.org.ar" style="color:var(--azul);" target="_blank">cfba.org.ar →</a>
+    </div>
+  </div>
+
+  <div class="box rojo">
+    <strong>⚠️ Lo que esto significa en la práctica:</strong> Un Centro de Día que recibe $741.078 por persona/mes según el nomenclador de diciembre 2024, está cobrando el equivalente al 43% de su poder adquisitivo de enero 2023. Con ese mismo dinero tiene que pagar sueldos, servicios y alquileres que ajustaron por inflación completa. La matemática no cierra. Por eso cierran los centros.
+  </div>
+</section>
+
+<!-- ===== PAGOS ===== -->
+<section id="pagos">
+  <div class="label">Atrasos en el pago</div>
+  <h2>¿Cuándo cobra el sistema?</h2>
+  <p class="lead">El problema no es solo el monto. Es también cuándo llega. Las obras sociales y el propio ANDIS acumulan demoras de meses en el pago a prestadores, generando una segunda crisis dentro de la crisis.</p>
+
+  <div class="pagos-grid">
+    <div class="pagos-card alert">
+      <div class="pagos-big" style="color:var(--rojo);">90–120</div>
+      <h4>días de demora habitual</h4>
+      <p>Demora promedio de pago de obras sociales a prestadores de Ley 24.901. Muchos centros reportan que la espera se extendió hasta 6 meses en 2024–2025.</p>
+      <div style="font-size:0.73rem; color:var(--gris); margin-top:8px;">Fuente: Infobae, junio 2025</div>
+    </div>
+    <div class="pagos-card alert">
+      <div class="pagos-big" style="color:var(--rojo);">Dic-2025</div>
+      <h4>último pago reportado</h4>
+      <p>Numerosos centros de día y talleres protegidos reportaron no haber recibido pagos desde diciembre de 2025, iniciando 2026 sin liquidación.</p>
+      <div style="font-size:0.73rem; color:var(--gris); margin-top:8px;">Fuente: organizaciones de la sociedad civil, primer trimestre 2026</div>
+    </div>
+    <div class="pagos-card warn">
+      <div class="pagos-big" style="color:var(--amarillo);">Devengado ≠ Pagado</div>
+      <h4>la brecha presupuestaria</h4>
+      <p>El presupuesto "devengado" (comprometido) y el "pagado" (girado) son distintos. La diferencia es deuda flotante del Estado. Los datos del API Presupuesto Abierto muestran el devengado; el pagado puede tardar meses más.</p>
+      <div style="font-size:0.73rem; color:var(--gris); margin-top:8px;">Fuente: Presupuesto Abierto, mecon.gov.ar</div>
+    </div>
+  </div>
+
+  <div class="box amarillo">
+    <strong>📊 ¿Qué mide el Presupuesto Abierto exactamente?</strong><br>
+    La API oficial del Ministerio de Economía publica el gasto <em>devengado</em>: es decir, el gasto que el Estado reconoció como obligación. Pero "devengado" no significa "cobrado por el prestador". En la cadena real de pagos, el flujo es: prestación ejecutada → facturación → auditoría → devengado → ordenado de pago → pagado. Entre cada etapa puede pasar semanas o meses. Los centros que dicen no cobrar desde diciembre pueden estar en cualquier punto de esa cadena.<br><br>
+    <strong>Dato pendiente de incorporar:</strong> La diferencia entre devengado y pagado por año, usando los datos de ejecución trimestral de la ONP, permitiría medir con precisión el atraso sistemático. Esta métrica se incorporará en la próxima versión del portal.
+  </div>
+
+  <div class="info-card mt-16">
+    <h3>🔗 ¿Cómo verificar el estado de pagos de tu institución?</h3>
+    <p>El <a href="https://www.presupuestoabierto.gob.ar/sici/analisis-transversal-discapacidad" style="color:var(--azul);" target="_blank">Portal de Presupuesto Abierto</a> permite ver la ejecución por jurisdicción y programa. Para información de pagos específicos a prestadores, el canal oficial es ANDIS: <a href="https://www.andis.gob.ar" style="color:var(--azul);" target="_blank">andis.gob.ar</a>. La ONP publica informes trimestrales de ejecución en <a href="https://www.economia.gob.ar/onp/estadisticas/" style="color:var(--azul);" target="_blank">economia.gob.ar/onp</a>.</p>
+  </div>
+</section>
+</div><!-- /container -->
+
+<!-- ===== HISTORIA ===== (full width bg) -->
+<div style="background: var(--gris-suave); border-top: 1px solid var(--borde); border-bottom: 1px solid var(--borde);">
+<div class="container">
+<section id="historia">
+  <div class="label">20 años en perspectiva</div>
+  <h2>Los momentos clave del presupuesto de discapacidad</h2>
+  <p class="lead">Los números no cambian solos: hay decisiones políticas detrás de cada viraje en la curva.</p>
+
+  <div class="timeline">
+    <div class="tl-item verde">
+      <div class="tl-dot verde"></div>
+      <div class="tl-year">2001</div>
+      <div class="tl-text">Solo <strong>76.000 personas</strong> recibían pensión no contributiva por discapacidad. El sistema era mínimo y de difícil acceso.</div>
+    </div>
+    <div class="tl-item">
+      <div class="tl-dot"></div>
+      <div class="tl-year">1997 — Marco legal</div>
+      <div class="tl-text">Se sanciona la <strong>Ley 24.901</strong> que obliga al Estado a financiar un sistema integral de prestaciones básicas para personas con discapacidad acreditada.</div>
+    </div>
+    <div class="tl-item">
+      <div class="tl-dot"></div>
+      <div class="tl-year">2003–2015 — Expansión masiva</div>
+      <div class="tl-text">Los beneficiarios pasan de ~80.000 a más de <strong>1.050.000</strong>. Se amplían las prestaciones y el acceso. Pero la inflación —especialmente entre 2007 y 2015, cuando los datos del INDEC fueron cuestionados— empieza a erosionar el valor real de las prestaciones individuales.</div>
+    </div>
+    <div class="tl-item">
+      <div class="tl-dot"></div>
+      <div class="tl-year">2017 — Creación de ANDIS</div>
+      <div class="tl-text">El Decreto 698/2017 crea la <strong>Agencia Nacional de Discapacidad (ANDIS)</strong>, absorbiendo programas del Ministerio de Desarrollo Social. Se centraliza la gestión de prestaciones, pensiones y certificaciones.</div>
+    </div>
+    <div class="tl-item rojo">
+      <div class="tl-dot rojo"></div>
+      <div class="tl-year">2018–2020 — Crisis y ajuste</div>
+      <div class="tl-text">Crisis macroeconómica (2018–2019: devaluación, FMI, inflación del 47,6% y 53,8%). Según análisis de ACIJ, el presupuesto original de ANDIS muestra <strong>tendencia decreciente en términos reales</strong> desde 2018. La pandemia de COVID-19 (2020) agrega presión.</div>
+    </div>
+    <div class="tl-item verde">
+      <div class="tl-dot verde"></div>
+      <div class="tl-year">2021 — Año pico</div>
+      <div class="tl-text">El gasto nacional vinculado a discapacidad alcanza el <strong>3,3% del presupuesto nacional</strong> y <strong>0,8% del PBI</strong>. Total ejecutado: <strong>$353.366 millones</strong>. Es el año de mayor inversión real en discapacidad de los últimos registros. El gasto por persona llega a <strong>$322.917/mes</strong> (pesos constantes dic-2024). <em>(Fuente: OPC, diciembre 2021)</em></div>
+    </div>
+    <div class="tl-item rojo">
+      <div class="tl-dot rojo"></div>
+      <div class="tl-year">2022–2023 — La caída real</div>
+      <div class="tl-text">El presupuesto pierde terreno frente a la inflación. En 2023, con una inflación del <strong>211,4% anual</strong>, la inversión real cae hasta <strong>$3.315.000 M</strong> (−29% vs 2021). El gasto por persona toca su mínimo histórico: <strong>$221.000/mes</strong>, por debajo del costo de una sola prestación. El nomenclador se actualiza 93% mientras la inflación es 211,4%.</div>
+    </div>
+    <div class="tl-item rojo">
+      <div class="tl-dot rojo"></div>
+      <div class="tl-year">Diciembre 2023 — Cambio de gobierno</div>
+      <div class="tl-text">Asume el gobierno de Javier Milei con un programa de <strong>ajuste fiscal</strong>. El presupuesto de discapacidad queda sujeto a revisión. Se anuncia un proceso de auditoría de beneficiarios.</div>
+    </div>
+    <div class="tl-item rojo">
+      <div class="tl-dot rojo"></div>
+      <div class="tl-year">2024–2025 — Recuperación parcial con nuevos problemas</div>
+      <div class="tl-text">Se suspenden o dan de baja <strong>132.672 pensiones</strong>. El presupuesto real se recupera en 2024 (+29% real vs 2023, aunque aún −8% vs 2021), pero el nomenclador sigue sin actualizarse en 2025 (0% de aumento vs 31,5% de inflación). Los atrasos en los pagos se extienden hasta 90–120 días en obras sociales, y muchos centros reportan no haber cobrado desde diciembre 2025. <em>(Fuentes: ANDIS, OPC, ACIJ, Infobae)</em></div>
+    </div>
+  </div>
+</section>
+</div>
+</div>
+
+<!-- ===== CRISIS ===== -->
+<div class="container">
+<section id="crisis">
+  <div class="crisis-wrap">
+    <div class="label" style="color:var(--rojo);">La crisis actual (2024–2025)</div>
+    <h2 style="color:var(--rojo);">Lo que los números no muestran</h2>
+    <p class="lead">El presupuesto de discapacidad no es solo una línea en una planilla. Detrás de cada peso hay una persona que necesita apoyos para vivir con dignidad.</p>
+
+    <div class="crisis-grid">
+      <div class="crisis-card">
+        <div class="crisis-icon">🏢</div>
+        <h3>Centros de día</h3>
+        <p>Cierres y suspensión de prestaciones en múltiples provincias por falta de actualizaciones de aranceles (0% en 2025) y demoras de hasta 120 días en pagos.</p>
+      </div>
+      <div class="crisis-card">
+        <div class="crisis-icon">🏭</div>
+        <h3>Talleres protegidos</h3>
+        <p>Organizaciones con décadas de historia enfrentan cierre por incapacidad de costear insumos con aranceles que valen 57% menos en términos reales que en 2023.</p>
+      </div>
+      <div class="crisis-card">
+        <div class="crisis-icon">💊</div>
+        <h3>Prestaciones de salud</h3>
+        <p>Demoras en autorizaciones y reintegros por parte de ANDIS generan situaciones críticas en tratamientos médicos esenciales.</p>
+      </div>
+      <div class="crisis-card">
+        <div class="crisis-icon">📋</div>
+        <h3>Pensiones suspendidas</h3>
+        <p>132.672 personas perdieron el acceso a pensiones entre 2024 y marzo 2025 y, con ellas, a prestaciones vinculadas de salud y servicios.</p>
+      </div>
+    </div>
+
+    <div class="box rojo">
+      <strong>⚠️ El efecto cascada:</strong> La pensión no contributiva por discapacidad no es solo un ingreso mensual. Es la <em>puerta de acceso</em> al sistema de prestaciones de la Ley 24.901. Perder la pensión significa, en muchos casos, perder también el acceso a tratamientos, terapias, transporte y los apoyos que hacen posible la vida cotidiana. Un corte presupuestario en un punto del sistema se propaga a todo el resto.
+    </div>
+
+    <div class="box amarillo mt-16">
+      <strong>💰 La doble crisis del financiamiento:</strong> El sistema enfrenta dos problemas simultáneos. Primero, el presupuesto real por persona es insuficiente para cubrir el costo de las prestaciones. Segundo, aun ese presupuesto insuficiente llega con 90 a 120 días de demora. Los prestadores están financiando al Estado: prestan el servicio hoy y cobran meses después, con pesos que valen menos. Cuando esa brecha es insostenible, cierran.
+    </div>
+  </div>
+</section>
+
+<!-- ===== CTA ===== -->
+<section id="accion">
+  <div class="label">¿Qué podés hacer?</div>
+  <h2>De los datos a la acción</h2>
+  <p class="lead">Los datos son el primer paso. El segundo es usarlos para exigir rendición de cuentas y políticas basadas en evidencia.</p>
+
+  <div class="cta-grid">
+    <div class="info-card">
+      <div style="font-size:1.5rem;margin-bottom:8px;">📤</div>
+      <h3>Compartí con datos</h3>
+      <p style="font-size:0.85rem;">Usá estas visualizaciones en conversaciones, redes sociales y con funcionarios. La información pública tiene más poder cuando la difunde la ciudadanía.</p>
+    </div>
+    <div class="info-card">
+      <div style="font-size:1.5rem;margin-bottom:8px;">🔍</div>
+      <h3>Chequeá las fuentes</h3>
+      <p style="font-size:0.85rem;">Todos los datos de esta plataforma tienen fuente oficial y enlace. Chequeá, cuestioná, profundizá. La transparencia presupuestaria es un derecho ciudadano.</p>
+    </div>
+    <div class="info-card">
+      <div style="font-size:1.5rem;margin-bottom:8px;">📣</div>
+      <h3>Sumarte a quienes trabajan en esto</h3>
+      <p style="font-size:0.85rem;">ACIJ, REDI, CIPPEC y muchas organizaciones de la sociedad civil monitorean estas políticas. Contactalas para saber cómo involucrarse.</p>
+    </div>
+    <div class="info-card">
+      <div style="font-size:1.5rem;margin-bottom:8px;">💬</div>
+      <h3>Consultá el presupuesto abierto</h3>
+      <p style="font-size:0.85rem;">El Estado publica los datos de ejecución en tiempo real. <a href="https://www.presupuestoabierto.gob.ar/sici/analisis-transversal-discapacidad" style="color:var(--azul);" target="_blank">presupuestoabierto.gob.ar →</a></p>
+    </div>
+  </div>
+</section>
+</div><!-- /container -->
+
+<!-- SOURCES -->
+<div class="sources-wrap" id="fuentes">
+  <div class="sources-inner">
+    <h3 style="margin-bottom:16px;font-size:1.1rem;">📚 Fuentes y metodología</h3>
+    <p style="font-size:0.83rem;color:var(--gris);margin-bottom:24px;">Esta plataforma solo cita fuentes oficiales del Estado argentino o de organizaciones con personería jurídica reconocida y trayectoria verificable.</p>
+
+    <div class="src-item"><strong>OPC — Oficina de Presupuesto del Congreso (2021):</strong> Ejecución Presupuestaria de la Inversión Social Nacional en Personas con Discapacidad, datos al 31/12/2021. Fuente primaria para datos 2021 (monto total, % PBI, % presupuesto, distribución ANDIS/ANSES). <a href="https://opc.gob.ar/poblacional/ejecucion-presupuestaria-de-la-inversion-social-nacional-en-personas-con-discapacidad-datos-al-31-de-diciembre-2021/" target="_blank">Ver informe →</a></div>
+    <div class="src-item"><strong>OPC — Monitor de Acciones Presupuestarias destinadas a Personas con Discapacidad:</strong> Series de ejecución trimestral. <a href="https://opc.gob.ar/monitores/acciones-presupuestarias-destinadas-a-personas-con-discapacidad-dis/" target="_blank">Ver monitor →</a></div>
+    <div class="src-item"><strong>OPC — Archivo opendata "etiquetasdiscpacidad_presupuestario.xls":</strong> Base completa de acciones presupuestarias etiquetadas como discapacidad, con porcentaje de imputación por línea. Datos 2025 (actualización: diciembre 2025). Devengado total ajustado por porcentaje_financiero: $5.400.663 M nominales. <a href="https://opc.gob.ar/Archivos/opendata/etiquetasdiscpacidad_presupuestario.xls" target="_blank">Descargar XLS →</a></div>
+    <div class="src-item"><strong>Presupuesto Abierto — API REST (Ministerio de Economía):</strong> Datos de ejecución por año para el análisis transversal discapacidad. Endpoints consultados: <code>/transversal/quien-gasta/discapacidad/{año}</code> y <code>/transversal/a-que-se-destina-el-gasto/discapacidad/{año}</code>. Datos recuperados 2020–2025. <a href="https://www.presupuestoabierto.gob.ar/sici/analisis-transversal-discapacidad" target="_blank">Ver plataforma →</a></div>
+    <div class="src-item"><strong>ANDIS — Agencia Nacional de Discapacidad:</strong> Datos de beneficiarios, prestaciones y suspensiones de pensiones (2024–2025). Nomenclador de prestaciones Ley 24.901. Decreto de creación: 698/2017. <a href="https://www.andis.gob.ar" target="_blank">andis.gob.ar →</a></div>
+    <div class="src-item"><strong>CFBA — Colegio de Fonoaudiólogos de Buenos Aires:</strong> Valores del Nomenclador ANDIS por prestación, diciembre 2024. Confirmados por Resolución Conjunta ANDIS / Ministerio de Salud. <a href="https://www.cfba.org.ar" target="_blank">cfba.org.ar →</a></div>
+    <div class="src-item"><strong>INDEC — Instituto Nacional de Estadística y Censos:</strong> Índice de Precios al Consumidor (IPC), series históricas nacionales dic-dic. IPC 2025: 31,5% (dato publicado enero 2026). <a href="https://www.indec.gob.ar/indec/web/Nivel4-Tema-2-21-143" target="_blank">indec.gob.ar →</a></div>
+    <div class="src-item"><strong>Infobae (junio 2025):</strong> "Las prestaciones de discapacidad: cuánto cuesta un tratamiento". Datos sobre demoras en pagos (90–120 días) y atraso acumulado del nomenclador (147,1%). Utilizado solo para contextualización; fuente primaria son los informes ANDIS y OPC.</div>
+    <div class="src-item"><strong>ACIJ — Asociación Civil por la Igualdad y la Justicia:</strong> Análisis del presupuesto de ANDIS 2022 (Semana Presupuesto y Derechos). Datos de bajas de pensiones 2025. <a href="https://acij.org.ar/presupuesto-y-personas-con-discapacidad/" target="_blank">Ver análisis →</a></div>
+    <div class="src-item"><strong>Ley 24.901 (1997):</strong> Sistema de Prestaciones Básicas de Atención Integral a favor de las Personas con Discapacidad. <a href="https://www.argentina.gob.ar/normativa/nacional/ley-24901-47677" target="_blank">Ver texto legal →</a></div>
+    <div class="src-item"><strong>Decreto 698/2017:</strong> Creación de la Agencia Nacional de Discapacidad (ANDIS). <a href="https://www.boletinoficial.gob.ar/detalleAviso/primera/167516/20170911" target="_blank">Ver decreto →</a></div>
+
+    <div class="src-meta">
+      <strong>Nota sobre inflación 2007–2015:</strong> Los datos del IPC-INDEC de ese período fueron intervenidos y sus cifras cuestionadas por organismos provinciales independientes (IPC-9 provincias) y el FMI. Los deflactores utilizados en esta plataforma corresponden al período 2020–2025, posterior a la normalización metodológica del INDEC (IPC-Nacional, base 2016). Para datos anteriores a 2020, se utilizan tendencias reportadas por ACIJ y OPC, señaladas con el badge <span class="badge est">estimado</span>.<br><br>
+      <strong>Datos estimados y calculados:</strong> Los años marcados <span class="badge est">estimado</span> (2018–2019) se basan en tendencias reportadas por ACIJ y ANDIS, anteriores a la metodología de etiquetado transversal implementada en 2021. Los valores marcados <span class="badge calc">calculado</span> provienen de la API de Presupuesto Abierto (datos oficiales del Ministerio de Economía) deflactados con el IPC-INDEC. El único dato <span class="badge ok">confirmado</span> con triple respaldo es 2021, validado por el informe OPC, la API y la Ley de Presupuesto.<br><br>
+      <strong>Alcance:</strong> Esta plataforma analiza el presupuesto <em>nacional</em>. Las provincias y municipios también tienen obligaciones bajo la Ley 24.901, que se incorporarán en versiones futuras.
+    </div>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <strong>Datos en común</strong> <span class="version-badge">v0.3 · Democratizando la información presupuestaria</span><br>
+  Plataforma de información pública sobre el presupuesto de discapacidad en la República Argentina<br>
+  Solo se utilizan fuentes oficiales del Estado argentino y organismos con personería jurídica reconocida y trayectoria verificable.<br>
+  <span style="margin-top:6px;display:block;font-size:0.72rem;">Datos 2020–2025 confirmados vía API Presupuesto Abierto (mecon.gov.ar), OPC opendata y IPC-INDEC.</span>
+  <span style="margin-top:10px;display:block;font-size:0.75rem;color:#6b7280;">Powered by <a href="mailto:belen@digitalkaizen.com.ar" style="color:#9ca3af;text-decoration:none;">belen@digitalkaizen.com.ar</a></span>
+</footer>
+
+<!-- ===== BARRA DE ACCESIBILIDAD ===== -->
+<div class="acc-toolbar" role="toolbar" aria-label="Opciones de accesibilidad">
+  <div class="acc-toolbar-label">Acceso</div>
+  <button class="acc-btn" id="btnMas"  onclick="cambiarFuente(1)"  title="Agrandar texto" aria-label="Agrandar tamaño de texto">A+</button>
+  <button class="acc-btn" id="btnMenos" onclick="cambiarFuente(-1)" title="Achicar texto"   aria-label="Achicar tamaño de texto">A−</button>
+  <button class="acc-btn" id="btnContraste" onclick="toggleContraste()" title="Alto contraste" aria-label="Activar modo alto contraste" aria-pressed="false">◑</button>
+  <button class="acc-btn" id="btnLeer" onclick="toggleLeer()" title="Leer en voz alta" aria-label="Leer página en voz alta" aria-pressed="false">🔊</button>
+</div>
+
+<!-- ===== CHARTS JS ===== -->
+<script>
+// ============================================================
+// HELPERS
+// ============================================================
+const COLOR = {
+  ok:   '#1e40af',
+  calc: '#3b82f6',
+  est:  '#93c5fd',
+  proy: '#a855f7',
+  rojo: '#dc2626',
+  verde:'#16a34a',
+};
+
+function barColors(typeArr, lastRed) {
+  return typeArr.map((t, i) => {
+    if (lastRed && i === typeArr.length - 1) return COLOR.rojo;
+    return COLOR[t] || COLOR.est;
+  });
+}
+
+const TOOLTIP_LABEL = {
+  ok:   '✅ Confirmado — Informe OPC dic-2021',
+  calc: '🔵 Calculado — API Presupuesto Abierto (mecon.gov.ar) + IPC INDEC',
+  est:  '⚠️ Estimado (tendencias ACIJ/ANDIS)',
+  proy: '🟣 Proyectado (ley presupuesto sancionada)',
+};
+
+// ============================================================
+// DATOS — BENEFICIARIOS
+// ============================================================
+const BEN_LABELS = ['2001','2004','2007','2010','2013','2015','2017','2019','2021','2023','2024','Mar-25'];
+const BEN_DATA   = [76000, 110000, 195000, 310000, 720000, 1050000, 1140000, 1200000, 1200000, 1250000, 1200000, 1193523];
+const BEN_TYPE   = ['ok','est','est','est','est','ok','est','est','ok','est','ok','ok'];
+
+// ============================================================
+// DATOS — PRESUPUESTO REAL (miles de millones $, pesos constantes dic-2024)
+// ============================================================
+const PRES_LABELS  = ['2018','2019','2020','2021','2022','2023','2024','2025'];
+const PRES_DATA    = [4080,  3780,  4060,  4650,  4047,  3315,  4277,  4108 ];
+const PRES_TYPE    = ['est', 'est', 'calc','ok',  'calc','calc','calc','calc'];
+
+// ============================================================
+// DATOS — GASTO POR PERSONA MENSUAL ($ constantes dic-2024)
+// Fórmula: presupuesto_real_en_pesos / (beneficiarios * 12)
+// 2018 (est): 4.080.000M / (1.150.000 × 12) = $295.652
+// 2019 (est): 3.780.000M / (1.180.000 × 12) = $266.949
+// 2020 (calc): 4.060.000M / (1.200.000 × 12) = $281.944
+// 2021 (ok):  4.650.000M / (1.200.000 × 12) = $322.917  ← PICO
+// 2022 (calc): 4.047.000M / (1.220.000 × 12) = $276.503
+// 2023 (calc): 3.315.000M / (1.250.000 × 12) = $221.000  ← MÍNIMO
+// 2024 (calc): 4.277.000M / (1.200.000 × 12) = $297.014
+// 2025 (calc): 4.108.000M / (1.193.523 × 12) = $286.826
+// ============================================================
+const GPP_LABELS = ['2018','2019','2020','2021','2022','2023','2024','2025'];
+const GPP_DATA   = [295652, 266949, 281944, 322917, 276503, 221000, 297014, 286826];
+const GPP_TYPE   = ['est','est','calc','ok','calc','calc','calc','calc'];
+
+// ============================================================
+// DATOS — % PRESUPUESTO NACIONAL
+// ============================================================
+const PCT_LABELS = ['2018','2019','2020','2021','2022','2023','2024','2025'];
+const PCT_DATA   = [2.6,   2.4,   2.3,   3.3,   2.9,   1.9,   2.2,   1.8  ];
+const PCT_TYPE   = ['est', 'est', 'est', 'ok',  'est', 'est', 'est', 'est'];
+
+// ============================================================
+// DATOS — IPC INFLACIÓN ANUAL
+// ============================================================
+const IPC_LABELS = ['2004','2005','2006','2007','2008','2009','2010','2011',
+                    '2012','2013','2014','2015','2016','2017','2018','2019',
+                    '2020','2021','2022','2023','2024','2025'];
+const IPC_OFICIAL = [6.1, 12.3, 9.8, 8.5, 7.2, 7.7, 10.9, 9.5,
+                     10.8, 10.9, 23.9, 12.0, 40.0, 24.8, 47.6, 53.8,
+                     36.1, 50.9, 94.8, 211.4, 117.0, 31.5];
+const IPC_ALT     = [null, null, null, 24.0, 30.0, 16.0, 26.0, 24.0,
+                     26.0, 28.0, 38.0, 27.0, null, null, null, null,
+                     null, null, null, null, null, null];
+const IPC_CONF    = [true, true, true, false, false, false, false, false,
+                     false, false, false, false, true, true, true, true,
+                     true, true, true, true, true, true];
+
+// ============================================================
+// DATOS — ARANCELES NOMENCLADOR vs IPC (2023-2025)
+// ============================================================
+const ARANCEL_LABELS = ['2023', '2024', '2025'];
+const ARANCEL_NOM    = [93,     99,     0    ];  // % actualización nomenclador
+const ARANCEL_IPC    = [211.4,  117.0,  31.5 ];  // % inflación anual
+
+// ============================================================
+// DATOS — COMPOSICIÓN PRESUPUESTO POR FUNCIÓN
+// Fuente: API Presupuesto Abierto /a-que-se-destina-el-gasto/discapacidad/{año}
+// ============================================================
+const FUNC_2024 = {
+  labels: ['Seguridad Social', 'Salud', 'Asistencia Social', 'Trabajo'],
+  data:   [3621268, 608828, 42286, 3834],   // millones nominales
+  pct:    [84.7, 14.2, 1.0, 0.1],
+  colors: ['#1e40af','#3b82f6','#93c5fd','#bfdbfe'],
+};
+const FUNC_2025 = {
+  labels: ['Seguridad Social', 'Salud', 'Asistencia Social', 'Trabajo'],
+  data:   [4909199, 807201, 47061, 4063],
+  pct:    [85.1, 14.0, 0.8, 0.1],
+  colors: ['#1e40af','#3b82f6','#93c5fd','#bfdbfe'],
+};
+
+// ============================================================
+// CHART 0 — Resumen sencillo: gasto por persona 2020–2025 + línea APND
+// ============================================================
+new Chart(document.getElementById('chartResumen'), {
+  type: 'bar',
+  data: {
+    labels: ['2020','2021','2022','2023','2024','2025'],
+    datasets: [
+      {
+        label: 'Presupuesto por persona / mes',
+        data: [281944, 322917, 276503, 221000, 297014, 286826],
+        backgroundColor: [
+          'rgba(59,130,246,0.75)',   // 2020
+          'rgba(22,163,74,0.85)',    // 2021 verde (pico)
+          'rgba(59,130,246,0.75)',   // 2022
+          'rgba(220,38,38,0.85)',    // 2023 rojo (piso)
+          'rgba(59,130,246,0.75)',   // 2024
+          'rgba(245,158,11,0.85)',   // 2025 amarillo (hoy)
+        ],
+        borderRadius: 8,
+        borderSkipped: false,
+        order: 2,
+      },
+      {
+        type: 'line',
+        label: 'Costo de 1 prestación APND (nomenclador oficial)',
+        data: [307654, 307654, 307654, 307654, 307654, 307654],
+        borderColor: '#dc2626',
+        borderWidth: 2.5,
+        borderDash: [7, 4],
+        pointRadius: 0,
+        fill: false,
+        order: 1,
+      }
+    ]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: {
+      legend: { display: true, labels: { font: { size: 11 }, boxWidth: 14, padding: 12 } },
+      tooltip: {
+        callbacks: {
+          label(ctx) {
+            if (ctx.datasetIndex === 1) return '  Costo APND: $307.654/mes — Nomenclador ANDIS dic-2024';
+            const v = Math.round(ctx.raw).toLocaleString('es-AR');
+            const etiquetas = { '2021':'🟢 Máximo histórico', '2023':'🔴 Mínimo histórico', '2025':'🟡 Hoy' };
+            const tag = etiquetas[ctx.label] || '';
+            return [`  $${v} por persona por mes`, tag ? `  ${tag}` : null].filter(Boolean);
+          }
+        }
+      }
+    },
+    scales: {
+      y: {
+        beginAtZero: false, min: 0,
+        grid: { color: '#f3f4f6' },
+        ticks: { callback: v => '$' + (v/1000).toFixed(0) + 'K' }
+      },
+      x: { grid: { display: false } }
+    }
+  }
+});
+
+// ============================================================
+// CHART 1 — Beneficiarios
+// ============================================================
+new Chart(document.getElementById('chartBen'), {
+  type: 'bar',
+  data: {
+    labels: BEN_LABELS,
+    datasets: [{
+      label: 'Beneficiarios',
+      data: BEN_DATA,
+      backgroundColor: barColors(BEN_TYPE, true),
+      borderRadius: 6,
+      borderSkipped: false,
+    }]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: {
+      legend: { display: false },
+      tooltip: {
+        callbacks: {
+          label(ctx) {
+            const v = ctx.raw.toLocaleString('es-AR');
+            const t = TOOLTIP_LABEL[BEN_TYPE[ctx.dataIndex]];
+            return [`${v} personas`, t];
+          }
+        }
+      }
+    },
+    scales: {
+      y: {
+        beginAtZero: true,
+        grid: { color: '#f3f4f6' },
+        ticks: { callback: v => v >= 1e6 ? (v/1e6).toFixed(1)+'M' : v >= 1000 ? (v/1000).toFixed(0)+'K' : v }
+      },
+      x: { grid: { display: false } }
+    }
+  }
+});
+
+// ============================================================
+// CHART 2 — Presupuesto real
+// ============================================================
+new Chart(document.getElementById('chartPres'), {
+  type: 'bar',
+  data: {
+    labels: PRES_LABELS,
+    datasets: [{
+      label: 'Miles de millones $ const. 2024',
+      data: PRES_DATA,
+      backgroundColor: barColors(PRES_TYPE, false),
+      borderRadius: 6,
+      borderSkipped: false,
+    }]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: {
+      legend: { display: false },
+      tooltip: {
+        callbacks: {
+          label(ctx) {
+            const v = ctx.raw.toLocaleString('es-AR');
+            const t = TOOLTIP_LABEL[PRES_TYPE[ctx.dataIndex]];
+            return [`$${v} mil millones ($ const. dic-2024)`, t];
+          }
+        }
+      }
+    },
+    scales: {
+      y: {
+        beginAtZero: false, min: 0,
+        grid: { color: '#f3f4f6' },
+        ticks: { callback: v => '$' + v.toLocaleString('es-AR') }
+      },
+      x: { grid: { display: false } }
+    }
+  }
+});
+
+// ============================================================
+// CHART 3 — % presupuesto nacional
+// ============================================================
+new Chart(document.getElementById('chartPct'), {
+  type: 'line',
+  data: {
+    labels: PCT_LABELS,
+    datasets: [{
+      label: '% del Presupuesto Nacional',
+      data: PCT_DATA,
+      borderColor: '#1e40af',
+      backgroundColor: 'rgba(30,64,175,.1)',
+      borderWidth: 2.5,
+      pointRadius: 5,
+      pointBackgroundColor: barColors(PCT_TYPE, false),
+      pointBorderColor: '#fff',
+      pointBorderWidth: 2,
+      fill: true,
+      tension: 0.3,
+    }]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: {
+      legend: { display: false },
+      tooltip: {
+        callbacks: {
+          label(ctx) {
+            const t = TOOLTIP_LABEL[PCT_TYPE[ctx.dataIndex]];
+            return [`${ctx.raw}% del presupuesto nacional`, t];
+          }
+        }
+      }
+    },
+    scales: {
+      y: {
+        min: 0, max: 4.5,
+        grid: { color: '#f3f4f6' },
+        ticks: { callback: v => v + '%' }
+      },
+      x: { grid: { display: false } }
+    }
+  }
+});
+
+// ============================================================
+// CHART 4 — Composición 2024
+// ============================================================
+new Chart(document.getElementById('chartFuncion2024'), {
+  type: 'doughnut',
+  data: {
+    labels: FUNC_2024.labels,
+    datasets: [{
+      data: FUNC_2024.pct,
+      backgroundColor: FUNC_2024.colors,
+      borderWidth: 2,
+      borderColor: '#fff',
+    }]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: {
+      legend: { position: 'bottom', labels: { font: { size: 11 }, boxWidth: 12, padding: 8 } },
+      tooltip: {
+        callbacks: {
+          label(ctx) { return ` ${ctx.label}: ${ctx.raw}%`; }
+        }
+      }
+    }
+  }
+});
+
+// ============================================================
+// CHART 5 — Composición 2025
+// ============================================================
+new Chart(document.getElementById('chartFuncion2025'), {
+  type: 'doughnut',
+  data: {
+    labels: FUNC_2025.labels,
+    datasets: [{
+      data: FUNC_2025.pct,
+      backgroundColor: FUNC_2025.colors,
+      borderWidth: 2,
+      borderColor: '#fff',
+    }]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: {
+      legend: { position: 'bottom', labels: { font: { size: 11 }, boxWidth: 12, padding: 8 } },
+      tooltip: {
+        callbacks: {
+          label(ctx) { return ` ${ctx.label}: ${ctx.raw}%`; }
+        }
+      }
+    }
+  }
+});
+
+// ============================================================
+// CHART 6 — IPC Inflación histórica
+// ============================================================
+new Chart(document.getElementById('chartIPC'), {
+  type: 'bar',
+  data: {
+    labels: IPC_LABELS,
+    datasets: [{
+      label: 'Inflación anual % (IPC INDEC)',
+      data: IPC_OFICIAL,
+      backgroundColor: IPC_LABELS.map((y, i) => {
+        if (!IPC_CONF[i]) return 'rgba(245,158,11,0.75)';
+        if (IPC_OFICIAL[i] >= 100) return 'rgba(220,38,38,0.9)';
+        if (IPC_OFICIAL[i] >= 40)  return 'rgba(220,38,38,0.65)';
+        if (IPC_OFICIAL[i] >= 20)  return 'rgba(251,146,60,0.8)';
+        return 'rgba(30,64,175,0.75)';
+      }),
+      borderRadius: 4,
+      borderSkipped: false,
+    }]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: {
+      legend: { display: false },
+      tooltip: {
+        callbacks: {
+          label(ctx) {
+            const i = ctx.dataIndex;
+            const lines = [`${ctx.raw}% (IPC-INDEC oficial)`];
+            if (!IPC_CONF[i]) {
+              lines.push('⚠️ Dato cuestionado (intervención INDEC 2007-2015)');
+              if (IPC_ALT[i]) lines.push(`📊 IPC alternativo (9 provincias): ~${IPC_ALT[i]}%`);
+            } else {
+              lines.push('✅ Dato confiable (INDEC)');
+            }
+            return lines;
+          }
+        }
+      }
+    },
+    scales: {
+      y: {
+        beginAtZero: true,
+        grid: { color: '#f3f4f6' },
+        ticks: { callback: v => v + '%' }
+      },
+      x: { grid: { display: false } }
+    }
+  }
+});
+
+// ============================================================
+// CHART 7 — Gasto por persona mensual
+// ============================================================
+new Chart(document.getElementById('chartGPP'), {
+  type: 'bar',
+  data: {
+    labels: GPP_LABELS,
+    datasets: [
+      {
+        label: 'Gasto mensual por persona',
+        data: GPP_DATA,
+        backgroundColor: barColors(GPP_TYPE, false),
+        borderRadius: 6,
+        borderSkipped: false,
+        order: 2,
+      },
+      {
+        // Reference line: APND arancel $307.654
+        type: 'line',
+        label: 'Arancel APND (1 prestación/mes)',
+        data: GPP_LABELS.map(() => 307654),
+        borderColor: '#dc2626',
+        borderWidth: 2,
+        borderDash: [6, 4],
+        pointRadius: 0,
+        fill: false,
+        order: 1,
+      }
+    ]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        display: true,
+        labels: { font: { size: 11 }, boxWidth: 14, padding: 10 }
+      },
+      tooltip: {
+        callbacks: {
+          label(ctx) {
+            if (ctx.datasetIndex === 1) return '  Arancel APND: $307.654/mes (nomenclador dic-2024)';
+            const v = Math.round(ctx.raw).toLocaleString('es-AR');
+            const t = TOOLTIP_LABEL[GPP_TYPE[ctx.dataIndex]];
+            return [`  $${v}/persona/mes ($ const. dic-2024)`, `  ${t}`];
+          }
+        }
+      }
+    },
+    scales: {
+      y: {
+        beginAtZero: false, min: 0,
+        grid: { color: '#f3f4f6' },
+        ticks: {
+          callback: v => '$' + (v/1000).toFixed(0) + 'K'
+        }
+      },
+      x: { grid: { display: false } }
+    }
+  }
+});
+
+// ============================================================
+// CHART 8b — Presupuesto NOMINAL (pesos corrientes)
+// Calculado: real / deflactor · 2018 est: 4080B/41.59 ≈ 98.1B · 2019 est: 3780B/27.03 ≈ 139.8B
+// ============================================================
+const NOM_LABELS = ['2018','2019','2020','2021','2022','2023','2024','2025'];
+const NOM_DATA   = [98100,  139800, 204428, 353366, 598743, 1527421, 4276519, 5400663]; // millones $
+const NOM_TYPE   = ['est',  'est',  'calc', 'ok',   'calc', 'calc',  'calc',  'calc' ];
+
+new Chart(document.getElementById('chartNominal'), {
+  type: 'bar',
+  data: {
+    labels: NOM_LABELS,
+    datasets: [{
+      label: 'Presupuesto nominal (miles de millones $)',
+      data: NOM_DATA.map(v => v / 1000), // convertir a miles de millones
+      backgroundColor: barColors(NOM_TYPE, false),
+      borderRadius: 6,
+      borderSkipped: false,
+    }]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: {
+      legend: { display: false },
+      tooltip: {
+        callbacks: {
+          label(ctx) {
+            const v = (ctx.raw * 1000).toLocaleString('es-AR', {maximumFractionDigits:0});
+            const t = TOOLTIP_LABEL[NOM_TYPE[ctx.dataIndex]];
+            return [`$${v} millones nominales`, t];
+          }
+        }
+      }
+    },
+    scales: {
+      y: {
+        beginAtZero: true,
+        grid: { color: '#f3f4f6' },
+        ticks: {
+          callback: v => v >= 1000 ? '$' + (v/1000).toFixed(0) + ' billones' : '$' + v + ' mil M'
+        }
+      },
+      x: { grid: { display: false } }
+    }
+  }
+});
+
+// ============================================================
+// CHART 8c — % del PBI (2018–2025)
+// 2021: 0,80% confirmado (OPC). Resto estimado:
+//   %PBI = presupuesto_real / GDP_real_constante
+//   GDP 2021 = 4650/0.008 = 581.250B (base dic-2024)
+//   GDP crece: 2021+10.4%, 2022+5.2%, 2023-1.6%, 2024-1.7%, 2025+4%
+//   GDP retrocede: 2020-9.9%, 2019-2.1%, 2018-2.6%
+// ============================================================
+const PBI_LABELS = ['2018','2019','2020','2021','2022','2023','2024','2025'];
+const PBI_DATA   = [0.68,   0.65,  0.77,  0.80,  0.66,  0.55,  0.72,  0.67 ];
+const PBI_TYPE   = ['est',  'est', 'est', 'ok',  'est', 'est', 'est', 'est' ];
+
+new Chart(document.getElementById('chartPBI'), {
+  type: 'line',
+  data: {
+    labels: PBI_LABELS,
+    datasets: [{
+      label: '% del PBI',
+      data: PBI_DATA,
+      borderColor: '#16a34a',
+      backgroundColor: 'rgba(22,163,74,0.1)',
+      borderWidth: 2.5,
+      pointRadius: 5,
+      pointBackgroundColor: PBI_TYPE.map(t => t === 'ok' ? '#1e40af' : '#93c5fd'),
+      pointBorderColor: '#fff',
+      pointBorderWidth: 2,
+      fill: true,
+      tension: 0.3,
+    }]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: {
+      legend: { display: false },
+      tooltip: {
+        callbacks: {
+          label(ctx) {
+            const t = TOOLTIP_LABEL[PBI_TYPE[ctx.dataIndex]];
+            return [`${ctx.raw}% del PBI`, `Por cada $100 de la economía: ${(ctx.raw/100*100).toFixed(0)} centavos`, t];
+          }
+        }
+      }
+    },
+    scales: {
+      y: {
+        min: 0, max: 1.2,
+        grid: { color: '#f3f4f6' },
+        ticks: { callback: v => v.toFixed(2) + '%' }
+      },
+      x: { grid: { display: false } }
+    }
+  }
+});
+
+// ============================================================
+// CHART 8 — Aranceles: nomenclador vs IPC
+// ============================================================
+new Chart(document.getElementById('chartArancel'), {
+  type: 'bar',
+  data: {
+    labels: ARANCEL_LABELS,
+    datasets: [
+      {
+        label: 'Actualización nomenclador ANDIS (%)',
+        data: ARANCEL_NOM,
+        backgroundColor: 'rgba(30,64,175,0.8)',
+        borderRadius: 6,
+        borderSkipped: false,
+      },
+      {
+        label: 'Inflación anual IPC-INDEC (%)',
+        data: ARANCEL_IPC,
+        backgroundColor: 'rgba(220,38,38,0.75)',
+        borderRadius: 6,
+        borderSkipped: false,
+      }
+    ]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        display: true,
+        labels: { font: { size: 11 }, boxWidth: 14, padding: 10 }
+      },
+      tooltip: {
+        callbacks: {
+          label(ctx) {
+            const y = ARANCEL_LABELS[ctx.dataIndex];
+            if (ctx.datasetIndex === 0) {
+              return `  Nomenclador: +${ctx.raw}% en ${y}`;
+            } else {
+              const gap = ARANCEL_IPC[ctx.dataIndex] - ARANCEL_NOM[ctx.dataIndex];
+              return [`  Inflación: +${ctx.raw}% en ${y}`, `  Brecha: −${gap.toFixed(1)} puntos porcentuales`];
+            }
+          }
+        }
+      }
+    },
+    scales: {
+      y: {
+        beginAtZero: true,
+        grid: { color: '#f3f4f6' },
+        ticks: { callback: v => v + '%' }
+      },
+      x: { grid: { display: false } }
+    }
+  }
+});
+
+/* ===== NAV MOBILE ===== */
+function toggleNav() {
+  const links  = document.getElementById('nav-links');
+  const toggle = document.getElementById('nav-toggle');
+  const open   = links.classList.toggle('open');
+  toggle.setAttribute('aria-expanded', open.toString());
+  toggle.textContent = open ? '✕' : '☰';
+}
+// Cerrar menú al hacer click en cualquier link
+document.getElementById('nav-links').querySelectorAll('a').forEach(a => {
+  a.addEventListener('click', () => {
+    document.getElementById('nav-links').classList.remove('open');
+    document.getElementById('nav-toggle').setAttribute('aria-expanded', 'false');
+    document.getElementById('nav-toggle').textContent = '☰';
+  });
+});
+
+/* ===== ACCESIBILIDAD ===== */
+
+// --- Tamaño de fuente ---
+let nivelFuente = 0;
+function cambiarFuente(delta) {
+  nivelFuente = Math.max(-2, Math.min(4, nivelFuente + delta));
+  const base = 16 + nivelFuente * 2; // 12px … 24px
+  document.documentElement.style.fontSize = base + 'px';
+}
+
+// --- Alto contraste ---
+function toggleContraste() {
+  const body = document.body;
+  const btn  = document.getElementById('btnContraste');
+  body.classList.toggle('alto-contraste');
+  const activo = body.classList.contains('alto-contraste');
+  btn.classList.toggle('activo', activo);
+  btn.setAttribute('aria-pressed', activo.toString());
+}
+
+// --- Leer en voz alta (Web Speech API) ---
+let leyendo = false;
+let utterance = null;
+function toggleLeer() {
+  const btn = document.getElementById('btnLeer');
+  if (!('speechSynthesis' in window)) {
+    alert('Tu navegador no soporta la lectura en voz alta. Probá con Chrome o Edge.');
+    return;
+  }
+  if (leyendo) {
+    window.speechSynthesis.cancel();
+    leyendo = false;
+    btn.classList.remove('activo');
+    btn.setAttribute('aria-pressed', 'false');
+    return;
+  }
+  // Extraer texto visible de la página (excluyendo nav y toolbar)
+  const bloques = document.querySelectorAll(
+    'section h2, section h3, section p, section li, section .card-num, section .card p, .resumen-wrap h2, .resumen-wrap p'
+  );
+  const textoCompleto = Array.from(bloques)
+    .map(el => el.innerText.trim())
+    .filter(t => t.length > 2)
+    .join('. ');
+
+  utterance = new SpeechSynthesisUtterance(textoCompleto);
+  utterance.lang  = 'es-AR';
+  utterance.rate  = 0.92;
+  utterance.pitch = 1.0;
+  utterance.onend = () => {
+    leyendo = false;
+    btn.classList.remove('activo');
+    btn.setAttribute('aria-pressed', 'false');
+  };
+  window.speechSynthesis.speak(utterance);
+  leyendo = true;
+  btn.classList.add('activo');
+  btn.setAttribute('aria-pressed', 'true');
+}
+
+// --- Aria-labels en gráficos ---
+const ariaDescripciones = {
+  chartResumen:    'Gráfico de barras: presupuesto de discapacidad por persona por mes en pesos constantes (2020–2025), con línea de referencia del costo de una prestación APND.',
+  chartNominal:    'Gráfico de barras: evolución del presupuesto nominal de discapacidad en millones de pesos corrientes (2018–2025).',
+  chartReal:       'Gráfico de barras: evolución del presupuesto real de discapacidad en millones de pesos constantes de diciembre 2024 (2018–2025).',
+  chartPBI:        'Gráfico de línea: presupuesto de discapacidad como porcentaje del PBI de Argentina (2018–2025). Pico en 2021 (0,80%), mínimo en 2023 (0,55%).',
+  chartPersona:    'Gráfico de barras: gasto mensual por persona con discapacidad en pesos constantes de diciembre 2024 (2018–2025). Pico en 2021 ($322.917), mínimo en 2023 ($221.000).',
+  chartArancel:    'Gráfico de barras comparativo: incremento porcentual del nomenclador ANDIS versus la inflación IPC-INDEC en los años 2023, 2024 y 2025.',
+  chartPagos:      'Gráfico de línea: pagos mensuales devengados por el Estado en el presupuesto de discapacidad durante 2025.',
+  chartHistoria:   'Gráfico de línea: serie histórica del presupuesto real de discapacidad 2006–2025 en millones de pesos constantes de diciembre 2024.',
+  chartGap:        'Gráfico de barras apiladas: brecha acumulada entre el costo real de prestaciones y el presupuesto ejecutado (2020–2025).',
+  chartSistema:    'Gráfico circular: composición del sistema de discapacidad por tipo de prestación financiada por ANDIS.',
+  chartEjecucion:  'Gráfico de barras: porcentaje de ejecución presupuestaria mensual acumulada en 2024 versus 2025.',
+};
+
+Object.entries(ariaDescripciones).forEach(([id, desc]) => {
+  const canvas = document.getElementById(id);
+  if (canvas) {
+    canvas.setAttribute('role', 'img');
+    canvas.setAttribute('aria-label', desc);
+  }
+});
+</script>
+</body>
+</html>
