@@ -384,6 +384,47 @@
     .resumen-cta a { color: var(--azul); font-weight: 700; font-size: 0.92rem; text-decoration: none; }
     .resumen-cta a:hover { text-decoration: underline; }
 
+    /* ===== FICHAS DE DATO (tooltips de verificación) ===== */
+    .dato-wrap { position: relative; display: inline; }
+    .info-btn {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 20px; height: 20px; border-radius: 50%;
+      background: var(--azul); color: #fff;
+      font-size: 0.65rem; font-weight: 700; font-style: normal;
+      border: none; cursor: pointer; vertical-align: super;
+      margin-left: 5px; flex-shrink: 0; line-height: 1;
+      transition: background .15s; font-family: inherit;
+    }
+    .info-btn:hover { background: var(--azul-med); }
+    .ficha-dato {
+      display: none; position: absolute; bottom: calc(100% + 12px); left: 0;
+      z-index: 600; width: 310px;
+      background: #fff; border: 1px solid var(--borde); border-radius: 14px;
+      box-shadow: 0 8px 32px rgba(0,0,0,.14); padding: 16px;
+      font-size: 0.8rem; line-height: 1.6; color: var(--texto);
+      text-align: left; font-weight: 400;
+    }
+    .ficha-dato.activa { display: block; }
+    .ficha-titulo { font-weight: 800; font-size: 0.84rem; color: var(--azul); margin-bottom: 12px; }
+    .ficha-paso {
+      display: flex; gap: 10px; padding: 7px 0;
+      border-bottom: 1px solid var(--borde); align-items: flex-start;
+    }
+    .ficha-paso:last-of-type { border-bottom: none; }
+    .ficha-op   { font-size: 0.8rem; font-weight: 900; color: var(--gris); min-width: 16px; margin-top: 1px; }
+    .ficha-val  { font-weight: 700; color: var(--azul); }
+    .ficha-src  { font-size: 0.72rem; color: var(--gris); display: block; margin-top: 2px; }
+    .ficha-src a { color: var(--azul); text-decoration: none; }
+    .ficha-src a:hover { text-decoration: underline; }
+    .ficha-resultado { font-weight: 800; color: var(--azul); font-size: 0.88rem; }
+    .ficha-nota { font-size: 0.73rem; color: var(--gris); margin-top: 10px; padding-top: 8px; border-top: 1px solid var(--borde); line-height: 1.5; }
+    .ficha-gem  { margin-top: 8px; font-size: 0.74rem; }
+    .ficha-gem a { color: #1a73e8; font-weight: 700; text-decoration: none; }
+    .ficha-gem a:hover { text-decoration: underline; }
+    @media (max-width: 768px) {
+      .ficha-dato { bottom: auto; top: calc(100% + 8px); left: 0; right: 0; width: auto; min-width: 260px; max-width: 92vw; }
+    }
+
     /* COMPARACIÓN DOS CAJAS */
     .dos-cajas { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 20px 0; }
     @media(max-width:480px) { .dos-cajas { grid-template-columns: 1fr; } }
@@ -527,13 +568,13 @@
   <div class="dos-cajas">
     <div class="caja-anio pico">
       <div class="caja-tag">🟢 2021 — el año con más recursos</div>
-      <div class="caja-monto">$322.917</div>
+      <div class="caja-monto"><span class="dato-wrap">$322.917<button class="info-btn" aria-label="Cómo se calculó este dato">ⓘ</button><div class="ficha-dato"><div class="ficha-titulo">📐 Cómo se calculó</div><div class="ficha-paso"><span class="ficha-op">1</span><span><span class="ficha-val">$4.650.000 M</span> — presupuesto real 2021 (pesos constantes dic-2024)<br><span class="ficha-src">Nominal $365.809 M × factor IPC 13,16 · <a href="https://www.presupuestoabierto.gob.ar/sici/analisis-transversal-discapacidad" target="_blank">Presupuesto Abierto →</a> · <a href="https://www.indec.gob.ar/indec/web/Nivel4-Tema-2-21-143" target="_blank">IPC INDEC →</a></span></span></div><div class="ficha-paso"><span class="ficha-op">÷</span><span><span class="ficha-val">1.200.000</span> beneficiarios activos 2021<br><span class="ficha-src"><a href="https://opc.gob.ar/monitores/acciones-presupuestarias-destinadas-a-personas-con-discapacidad-dis/" target="_blank">OPC Monitor dic-2021 →</a></span></span></div><div class="ficha-paso"><span class="ficha-op">÷</span><span><span class="ficha-val">12</span> meses</span></div><div class="ficha-paso"><span class="ficha-op">=</span><span class="ficha-resultado">$322.917 / mes por persona</span></div><div class="ficha-nota">⚠️ El presupuesto nominal en Presupuesto Abierto es $365.809 M; el valor ponderado por porcentaje_financiero (OPC) es $353.366 M. Usamos el valor OPC para consistencia metodológica.</div><div class="ficha-gem">¿Más preguntas? <a href="https://gemini.google.com/gem/11PJE8-U-u1R3WZk50HLWmZRPxMwgsSg_?usp=sharing" target="_blank">Consultá al asistente →</a></div></div></span></div>
       <div class="caja-sub">por persona por mes · pesos de diciembre 2024</div>
       <div class="caja-conclusion">Era el año con mayor inversión real en discapacidad de los últimos registros.</div>
     </div>
     <div class="caja-anio" style="background:var(--amarillo-s);border:2px solid var(--amarillo);">
       <div class="caja-tag" style="color:var(--amarillo);">🟡 2025 — hoy</div>
-      <div class="caja-monto" style="color:var(--amarillo);">$286.826</div>
+      <div class="caja-monto" style="color:var(--amarillo);"><span class="dato-wrap">$286.826<button class="info-btn" aria-label="Cómo se calculó este dato">ⓘ</button><div class="ficha-dato"><div class="ficha-titulo">📐 Cómo se calculó</div><div class="ficha-paso"><span class="ficha-op">1</span><span><span class="ficha-val">$4.108.000 M</span> — presupuesto real 2025 (pesos constantes dic-2024)<br><span class="ficha-src">Nominal $5.400.663 M ÷ factor IPC 1,315 · <a href="https://opc.gob.ar/Archivos/opendata/etiquetasdiscpacidad_presupuestario.xls" target="_blank">OPC opendata XLS →</a> · <a href="https://www.indec.gob.ar/indec/web/Nivel4-Tema-2-21-143" target="_blank">IPC INDEC →</a></span></span></div><div class="ficha-paso"><span class="ficha-op">÷</span><span><span class="ficha-val">1.193.523</span> beneficiarios activos 2025<br><span class="ficha-src"><a href="https://www.andis.gob.ar" target="_blank">ANDIS 2025 (estimado) →</a></span></span></div><div class="ficha-paso"><span class="ficha-op">÷</span><span><span class="ficha-val">12</span> meses</span></div><div class="ficha-paso"><span class="ficha-op">=</span><span class="ficha-resultado">$286.826 / mes por persona</span></div><div class="ficha-gem">¿Más preguntas? <a href="https://gemini.google.com/gem/11PJE8-U-u1R3WZk50HLWmZRPxMwgsSg_?usp=sharing" target="_blank">Consultá al asistente →</a></div></div></span></div>
       <div class="caja-sub">por persona por mes · pesos de diciembre 2024</div>
       <div class="caja-conclusion"><strong>$36.091 menos por persona que en 2021</strong>, cada mes. Una caída del 11% en términos reales.</div>
     </div>
@@ -863,17 +904,17 @@
 
   <div class="kpi-grid">
     <div class="kpi verde">
-      <div class="kpi-num">$322.917</div>
+      <div class="kpi-num"><span class="dato-wrap">$322.917<button class="info-btn" aria-label="Cómo se calculó este dato">ⓘ</button><div class="ficha-dato"><div class="ficha-titulo">📐 Cómo se calculó</div><div class="ficha-paso"><span class="ficha-op">1</span><span><span class="ficha-val">$4.650.000 M</span> — presupuesto real 2021 (pesos constantes dic-2024)<br><span class="ficha-src">Presupuesto nominal $365.809 M × factor IPC 13,16 · <a href="https://www.presupuestoabierto.gob.ar/sici/analisis-transversal-discapacidad" target="_blank">Presupuesto Abierto →</a> · <a href="https://www.indec.gob.ar/indec/web/Nivel4-Tema-2-21-143" target="_blank">IPC INDEC →</a></span></span></div><div class="ficha-paso"><span class="ficha-op">÷</span><span><span class="ficha-val">1.200.000</span> beneficiarios activos 2021<br><span class="ficha-src"><a href="https://opc.gob.ar/monitores/acciones-presupuestarias-destinadas-a-personas-con-discapacidad-dis/" target="_blank">OPC Monitor dic-2021 →</a></span></span></div><div class="ficha-paso"><span class="ficha-op">÷</span><span><span class="ficha-val">12</span> meses</span></div><div class="ficha-paso"><span class="ficha-op">=</span><span class="ficha-resultado">$322.917 / mes por persona</span></div><div class="ficha-nota">⚠️ El dato de beneficiarios (1.200.000) surge del monitor OPC dic-2021. El presupuesto nominal publicado en Presupuesto Abierto es $365.809 M; el valor ponderado por porcentaje_financiero (OPC) es $353.366 M. Usamos el valor OPC para consistencia metodológica.</div><div class="ficha-gem">¿Más preguntas? <a href="https://gemini.google.com/gem/11PJE8-U-u1R3WZk50HLWmZRPxMwgsSg_?usp=sharing" target="_blank">Consultá al asistente →</a></div></div></span></div>
       <div class="kpi-lbl">por persona / mes en 2021 — máximo histórico</div>
       <div class="kpi-src">Calculado: OPC 2021 + ANDIS beneficiarios + IPC INDEC</div>
     </div>
     <div class="kpi rojo">
-      <div class="kpi-num">$221.000</div>
+      <div class="kpi-num"><span class="dato-wrap">$221.000<button class="info-btn" aria-label="Cómo se calculó este dato">ⓘ</button><div class="ficha-dato"><div class="ficha-titulo">📐 Cómo se calculó</div><div class="ficha-paso"><span class="ficha-op">1</span><span><span class="ficha-val">$3.315.000 M</span> — presupuesto real 2023 (pesos constantes dic-2024)<br><span class="ficha-src">Nominal $1.527.421 M × factor IPC 2,17 · <a href="https://www.presupuestoabierto.gob.ar/sici/analisis-transversal-discapacidad" target="_blank">Presupuesto Abierto →</a> · <a href="https://www.indec.gob.ar/indec/web/Nivel4-Tema-2-21-143" target="_blank">IPC INDEC →</a></span></span></div><div class="ficha-paso"><span class="ficha-op">÷</span><span><span class="ficha-val">1.250.000</span> beneficiarios activos 2023<br><span class="ficha-src"><a href="https://opc.gob.ar/monitores/acciones-presupuestarias-destinadas-a-personas-con-discapacidad-dis/" target="_blank">OPC Monitor 2023 →</a></span></span></div><div class="ficha-paso"><span class="ficha-op">÷</span><span><span class="ficha-val">12</span> meses</span></div><div class="ficha-paso"><span class="ficha-op">=</span><span class="ficha-resultado">$221.000 / mes por persona</span></div><div class="ficha-gem">¿Más preguntas? <a href="https://gemini.google.com/gem/11PJE8-U-u1R3WZk50HLWmZRPxMwgsSg_?usp=sharing" target="_blank">Consultá al asistente →</a></div></div></span></div>
       <div class="kpi-lbl">por persona / mes en 2023 — mínimo histórico (−32% vs. 2021)</div>
       <div class="kpi-src">Calculado: API Presupuesto Abierto + IPC INDEC</div>
     </div>
     <div class="kpi naranja">
-      <div class="kpi-num">$286.826</div>
+      <div class="kpi-num"><span class="dato-wrap">$286.826<button class="info-btn" aria-label="Cómo se calculó este dato">ⓘ</button><div class="ficha-dato"><div class="ficha-titulo">📐 Cómo se calculó</div><div class="ficha-paso"><span class="ficha-op">1</span><span><span class="ficha-val">$4.108.000 M</span> — presupuesto real 2025 (pesos constantes dic-2024)<br><span class="ficha-src">Nominal $5.400.663 M ÷ factor IPC 1,315 · <a href="https://opc.gob.ar/Archivos/opendata/etiquetasdiscpacidad_presupuestario.xls" target="_blank">OPC opendata XLS →</a> · <a href="https://www.indec.gob.ar/indec/web/Nivel4-Tema-2-21-143" target="_blank">IPC INDEC →</a></span></span></div><div class="ficha-paso"><span class="ficha-op">÷</span><span><span class="ficha-val">1.193.523</span> beneficiarios activos 2025<br><span class="ficha-src"><a href="https://www.andis.gob.ar" target="_blank">ANDIS 2025 (estimado) →</a></span></span></div><div class="ficha-paso"><span class="ficha-op">÷</span><span><span class="ficha-val">12</span> meses</span></div><div class="ficha-paso"><span class="ficha-op">=</span><span class="ficha-resultado">$286.826 / mes por persona</span></div><div class="ficha-gem">¿Más preguntas? <a href="https://gemini.google.com/gem/11PJE8-U-u1R3WZk50HLWmZRPxMwgsSg_?usp=sharing" target="_blank">Consultá al asistente →</a></div></div></span></div>
       <div class="kpi-lbl">por persona / mes en 2025 — aún 11% por debajo del pico</div>
       <div class="kpi-src">Calculado: OPC opendata dic-2025 + IPC INDEC</div>
     </div>
@@ -938,7 +979,7 @@
       <div class="compare-row">
         <div class="compare-label">🤝 Apoyo a la persona (APND)</div>
         <div class="compare-track">
-          <div class="compare-fill" style="width:41.5%; background:#64748b;">$307.654</div>
+          <div class="compare-fill" style="width:41.5%; background:#64748b;position:relative;">$307.654<span class="dato-wrap" style="position:static;"><button class="info-btn" style="background:#fff;color:#111827;margin-left:6px;" aria-label="Qué es este dato">ⓘ</button><div class="ficha-dato" style="left:auto;right:0;"><div class="ficha-titulo">📋 Qué es este número</div><div class="ficha-paso"><span class="ficha-op">→</span><span>Arancel oficial del Estado por <span class="ficha-val">1 mes</span> de "Apoyo a la Persona con Discapacidad" (APND). Incluye 4 sesiones mensuales en modalidad individual.</span></div><div class="ficha-paso"><span class="ficha-op">→</span><span>Publicado en la <span class="ficha-val">Resolución Conjunta 9/2024</span> (Ministerio de Salud + ANDIS)<br><span class="ficha-src"><a href="https://www.boletinoficial.gob.ar/detalleAviso/primera/317628/20241203" target="_blank">Boletín Oficial, 3 dic 2024 →</a></span></span></div><div class="ficha-nota">Este es el precio que el Estado fija para pagarle a los prestadores. No incluye lo que pagan las familias de su bolsillo por encima del nomenclador.</div><div class="ficha-gem">¿Más preguntas? <a href="https://gemini.google.com/gem/11PJE8-U-u1R3WZk50HLWmZRPxMwgsSg_?usp=sharing" target="_blank">Consultá al asistente →</a></div></div></span></div>
         </div>
       </div>
       <div class="compare-row">
@@ -983,7 +1024,7 @@
 
   <div class="kpi-grid">
     <div class="kpi rojo">
-      <div class="kpi-num">−57%</div>
+      <div class="kpi-num"><span class="dato-wrap">−57%<button class="info-btn" aria-label="Cómo se calculó este dato">ⓘ</button><div class="ficha-dato"><div class="ficha-titulo">📐 Cómo se calculó</div><div class="ficha-paso"><span class="ficha-op">1</span><span>Nomenclador ANDIS creció <span class="ficha-val">×3,84</span> entre ene-2023 y dic-2025<br><span class="ficha-src">+93% en 2023 · +99% en 2024 · +0% en 2025 · <a href="https://www.boletinoficial.gob.ar/detalleAviso/primera/317628/20241203" target="_blank">Res. Conjunta ANDIS/Salud →</a></span></span></div><div class="ficha-paso"><span class="ficha-op">2</span><span>Inflación IPC-INDEC acumulada: <span class="ficha-val">×8,88</span><br><span class="ficha-src">+211,4% en 2023 · +117% en 2024 · +31,5% en 2025 · <a href="https://www.indec.gob.ar/indec/web/Nivel4-Tema-2-21-143" target="_blank">IPC INDEC →</a></span></span></div><div class="ficha-paso"><span class="ficha-op">=</span><span>1 − (3,84 ÷ 8,88) = <span class="ficha-resultado">−57% de valor real</span></span></div><div class="ficha-nota">Significa que un centro de día o terapeuta cobra lo mismo en pesos, pero esos pesos compran 57% menos que en 2023.</div><div class="ficha-gem">¿Más preguntas? <a href="https://gemini.google.com/gem/11PJE8-U-u1R3WZk50HLWmZRPxMwgsSg_?usp=sharing" target="_blank">Consultá al asistente →</a></div></div></span></div>
       <div class="kpi-lbl">perdió de valor real el nomenclador desde enero 2023 a diciembre 2025</div>
       <div class="kpi-src">Calculado: actualizaciones ANDIS vs. IPC INDEC acumulado 2023–2025</div>
     </div>
@@ -1908,6 +1949,20 @@ new Chart(document.getElementById('chartArancel'), {
       x: { grid: { display: false } }
     }
   }
+});
+
+/* ===== FICHAS DE DATO ===== */
+document.querySelectorAll('.info-btn').forEach(btn => {
+  btn.addEventListener('click', function(e) {
+    e.stopPropagation();
+    const ficha = this.nextElementSibling;
+    const estabaActiva = ficha.classList.contains('activa');
+    document.querySelectorAll('.ficha-dato').forEach(f => f.classList.remove('activa'));
+    if (!estabaActiva) ficha.classList.add('activa');
+  });
+});
+document.addEventListener('click', () => {
+  document.querySelectorAll('.ficha-dato').forEach(f => f.classList.remove('activa'));
 });
 
 /* ===== NAV MOBILE ===== */
